@@ -4,11 +4,9 @@ Go言語を使用したWeb API開発のチームプロジェクトです。
 
 ## 📋 プロジェクト概要
 
-**開発期間**: 2025/06/21 〜 2025/07/05 (2週間)  
-**チームメンバー**: 2名  
+**開発期間**: 2025/06/21 〜 2025/07/06 (2週間)  
+**チームメンバー**: 5名  
 **目標**: Go言語でテーマ性のあるWeb APIを開発し、ドキュメントとデモアプリケーションを作成
-
-[GoLang Web API](https://docs.google.com/document/d/109lAgPlqe-A-gEmL_E1rnRr0w2NHcBNEi8BpxeYxgCw/edit?tab=t.0)  
 
 ## ✅ 決定事項
 
@@ -20,12 +18,25 @@ Go言語を使用したWeb API開発のチームプロジェクトです。
 ### スケジュール
 - **〜6/25**: Go言語学習期間（各自でGo Tour完了）
 - **6/25**: プロジェクトテーマ決定・役割分担MTG
-- **6/26〜7/5**: 開発期間（実質10日間）
+- **6/26〜7/6**: 開発期間（実質10日間）
+
+#### 開発スケジュール詳細
+**第1週（6/26〜6/29）: エンドポイント実装週**
+- 目標：全エンドポイントの基本実装完了
+- 各メンバーが担当エンドポイントを実装
+- 基本的なJSON レスポンスが返却される状態
+
+**第2週（6/30〜7/6）: 統合・仕上げ週**
+- 目標：各タスクの完成・統合テスト
+- フロントエンド（デモアプリ）実装
+- APIドキュメント作成・整備
+- 全体統合テスト・バグ修正
 
 ### 開発方針
 - **API実装**: 1人1エンドポイント以上担当
 - **コードレビュー**: プルリクエストでお互いの実装を学び合う
 - **Git戦略**: GitHubフローで開発
+- **ブランチ戦略**: GitHub Flow（main + feature ブランチ）
 
 ## ❓ 未決定事項
 
@@ -61,10 +72,21 @@ go mod tidy
 
 ## 📝 開発フロー
 
+### ブランチ戦略：GitHub Flow
+- **mainブランチ**: 常にデプロイ可能な状態を保つ
+- **featureブランチ**: mainから作成し、新機能実装後にmainへマージ
+- **fixブランチ**: mainから作成し、バグ修正後にmainへマージ
+- **シンプルなブランチ構成**でチーム開発に最適
+
+#### ブランチ運用ルール
+- mainブランチへの直接pushは禁止
+- 必ずfeature/fixブランチを作成してPull Requestでマージ
+- マージ後はfeature/fixブランチを削除
+
 ### GitHubフローの基本
 1. **Issues作成**: 実装する機能や修正内容をIssueで管理
 2. **ブランチ作成**: `feature/機能名` または `fix/修正内容` 形式
-3. **実装・コミット**: [コミットメッセージ規約](##コミットメッセージ規約)に従う
+3. **実装・コミット**: [コミットメッセージ規約](#コミットメッセージ規約)に従う
 4. **プルリクエスト**: レビュー依頼とコードレビュー
 5. **マージ**: レビュー完了後にmainブランチへマージ
 
@@ -105,6 +127,7 @@ docs/api-documentation       # ドキュメント更新
 - GitHub上でリンクされ、トラッキングしやすくなる
 
 ### Title（必須・日本語でOK）
+- 変更内容を現在形で記載
 - 20〜30文字以内が適切
 
 ### コミットの粒度
@@ -140,7 +163,6 @@ add feature
 .
 ├── README.md            # プロジェクトの概要・使い方・開発ルール
 ├── devlog/              # 開発ログ・MTG記録
-│   ├── 2025-06-21-kickoff.md       # キックオフMTG記録
 │   └── 2025-06-25-theme-decision.md # テーマ決定MTG記録
 ├── backend/             # Go言語のWeb APIサーバー
 │   ├── main.go          # アプリケーションのエントリーポイント・HTTPサーバー起動
@@ -175,6 +197,7 @@ add feature
 - 使用方法・サンプルコード
 
 #### `devlog/`
+- **開発過程の記録**
 - MTG議事録・技術的な決定事項・振り返り
 
 ### 🔧 開発時の使い方
@@ -188,7 +211,7 @@ go run .
 # デモアプリ確認
 cd frontend
 # index.htmlをブラウザで開く  
-# → デモアプリでAPIが取得できているか確認
+# → デモアプリでAPI動作確認
 
 # APIドキュメント確認
 # docs/api-spec.md をエディタまたはGitHubで閲覧
@@ -209,14 +232,15 @@ cd frontend
 - **Milestones**: 週次での進捗管理
 
 ### コミュニケーション
-- **定期的なMTG**: 予めMTG日程を決めておこうかと思いま
-- **困った時**: いつでもDiscordで相談
+- **日次**: 簡単な進捗共有
+- **Weekly**: 詳細な振り返りとプランニング
+- **困った時**: いつでもSlack/Discordで相談
 
 ## 📚 学習リソース
 
 ### Go言語
-- [Go Tour (日本語)](https://go-tour-jp.appspot.com/) - **必須学習教材**
-- [RecursionCS Go](https://recursionist.io/learn/languages/go/) - **推奨学習教材**
+- [Go Tour (日本語)](https://go-tour-jp.appspot.com/)
+- [RecursionCS Go](https://recursionist.io/learn/languages/go/)
 - [Go公式ドキュメント](https://golang.org/doc/)
 - [Effective Go](https://golang.org/doc/effective_go.html)
 
@@ -228,8 +252,8 @@ cd frontend
 
 ### 最終的な提出物
 - [ ] Go製Web API
-- [ ] APIドキュメントWebサイト
 - [ ] デモWebアプリケーション
+- [ ] APIドキュメント（Markdown形式）
 - [ ] README（使用方法・API仕様）
 - [ ] 開発ログ（devlog/内のMarkdownファイル）
 
@@ -237,12 +261,7 @@ cd frontend
 
 | Name | GitHub | Role | 担当エンドポイント |
 |------|--------|------|-------------------|
-| 有堀 | [@takeshi-arihori] | Team Leader | 例: GET /api/movies, POST /api/movies |
-|  | [] | Developer | TBD |
-|  | [] | Developer | TBD |
-|  | [] | Developer | TBD |
-|  | [] | Developer | TBD |
-
+| Takeshi Arihori | [Takeshi Arihori](https://github.com/takeshi-arihori) | Developer | TBD |
 
 ---
 
