@@ -15,9 +15,41 @@ Go言語を使用したWeb API開発のチームプロジェクトです。
 - **フロントエンド**: HTML, CSS, JavaScript
 - **デプロイ**: ローカル環境のみ
 
+### プロジェクトテーマ
+**映画API (TMDB連携)**
+- [The Movie Database (TMDB) API](https://developer.themoviedb.org/docs/getting-started) を使用
+- 映画情報の検索・取得・管理機能を実装
+- [API Reference & Live Testing](https://developer.themoviedb.org/reference/account-details)
+
+### エンドポイント設計
+- 映画一覧取得API (リスト表示)
+- 映画詳細取得API (詳細表示)
+- 映画検索API (検索)
+- 人気映画ランキングAPI (データの集計)
+- ジャンル別映画取得API (ジャンル別)
+
+### データ構造
+- TMDB APIと連携した映画情報データ
+- JSON形式でのレスポンス
+- Go構造体での型安全なデータ管理
+
+### 役割分担
+| 担当者  | 役割             | 詳細                                                 |
+| ------- | ---------------- | ---------------------------------------------------- |
+| Masato  | ドキュメント作成 | API仕様書・エンドポイント設計書・使用方法            |
+| Arihori | インフラ・基盤   | ディレクトリ構成・ヘルスチェックAPI・映画一覧取得API |
+| 全員    | 映画API作成      | 各自エンドポイント分担・TMDB API連携                 |
+
+### レビュー体制
+| プッシュする人 | レビュワー |
+| -------------- | ---------- |
+| Masato         | Hiroki     |
+| Hiroki         | Arihori    |
+| Arihori        | Masato     |
+
 ### スケジュール
-- **〜6/25**: Go言語学習期間（各自でGo Tour完了）
-- **6/25**: プロジェクトテーマ決定・役割分担MTG
+- **〜6/25**: Go言語学習期間 ✅
+- **6/25**: プロジェクトテーマ決定・役割分担MTG ✅
 - **6/26〜7/6**: 開発期間（実質10日間）
 
 #### 開発スケジュール詳細
@@ -32,24 +64,17 @@ Go言語を使用したWeb API開発のチームプロジェクトです。
 - APIドキュメント作成・整備
 - 全体統合テスト・バグ修正
 
+#### マイルストーン
+| 期限       | 担当 | タスク                                     |
+| ---------- | ---- | ------------------------------------------ |
+| 金曜日まで | 有堀 | ディレクトリ構成 + デプロイ                |
+| 金曜日まで | 有堀 | API healthチェック + 基本エンドポイント1つ |
+| 日曜日まで | 全員 | Go API 各エンドポイント作成                |
+
 ### 開発方針
 - **API実装**: 1人1エンドポイント以上担当
 - **コードレビュー**: プルリクエストでお互いの実装を学び合う
-- **Git戦略**: GitHubフローで開発
-- **ブランチ戦略**: GitHub Flow（main + feature ブランチ）
-
-## ❓ 未決定事項
-
-### プロジェクト仕様
-- [ ] APIのテーマ選定
-- [ ] 具体的なエンドポイント設計
-- [ ] データ構造定義
-- [ ] 詳細な役割分担
-
-### 技術選択
-- [ ] 外部ライブラリの使用範囲
-- [ ] データ管理方法（メモリ/ファイル/DB）
-- [ ] フロントエンドフレームワークの使用可否
+- **詳細なGitHub運用ルールは[README.github.md](./README.github.md)を参照**
 
 ## 🛠️ 開発環境セットアップ
 
@@ -67,95 +92,10 @@ cd [リポジトリ名]
 go version
 
 # 依存関係の確認（go.modファイル作成後）
+cd backend
 go mod tidy
 ```
 
-## 📝 開発フロー
-
-### ブランチ戦略：GitHub Flow
-- **mainブランチ**: 常にデプロイ可能な状態を保つ
-- **featureブランチ**: mainから作成し、新機能実装後にmainへマージ
-- **fixブランチ**: mainから作成し、バグ修正後にmainへマージ
-- **シンプルなブランチ構成**でチーム開発に最適
-
-#### ブランチ運用ルール
-- mainブランチへの直接pushは禁止
-- 必ずfeature/fixブランチを作成してPull Requestでマージ
-- マージ後はfeature/fixブランチを削除
-
-### GitHubフローの基本
-1. **Issues作成**: 実装する機能や修正内容をIssueで管理
-2. **ブランチ作成**: `feature/機能名` または `fix/修正内容` 形式
-3. **実装・コミット**: [コミットメッセージ規約](#コミットメッセージ規約)に従う
-4. **プルリクエスト**: レビュー依頼とコードレビュー
-5. **マージ**: レビュー完了後にmainブランチへマージ
-
-### ブランチ命名規則
-```
-feature/api-endpoint-name    # 新機能実装
-feature/user-authentication  # ユーザー認証機能
-fix/json-response-format     # バグ修正
-docs/api-documentation       # ドキュメント更新
-```
-
-## 📋 コミットメッセージ
-
-### 参考
-- [Gitのコミットメッセージの書き方（2023年ver.）](https://zenn.dev/itosho/articles/git-commit-message-2023)
-- [Gitブランチ戦略について](https://qiita.com/ucan-lab/items/371cdbaa2490817a6e2a)
-
-### 基本フォーマット
-```
-<Type>: <Emoji> #<Issue Number> <Title>
-```
-
-### Type（必須）
-- **feat**: ユーザー向けの機能の追加や変更
-- **fix**: ユーザー向けの不具合の修正
-- **docs**: ドキュメントの更新
-- **style**: フォーマットなどのスタイルに関する修正
-- **refactor**: リファクタリングを目的とした修正
-- **test**: テストコードの追加や修正
-- **chore**: タスクファイルなどプロダクションに影響のない修正
-
-### Emoji（任意）
-- [gitmoji](https://gitmoji.dev)から選択
-- Typeをよりカラフルにするため（必須ではない）
-
-### Issue Number（強く推奨）
-- そのコミットに紐づくIssue番号を記載
-- GitHub上でリンクされ、トラッキングしやすくなる
-
-### Title（必須・日本語でOK）
-- 変更内容を現在形で記載
-- 20〜30文字以内が適切
-
-### コミットの粒度
-- **1 Commit = 1つの意味あるまとまり**であるべき
-- レビュアーがPull Requestを見たときに"ストーリー"が分かることを意識
-- **1 Issue、1 Pull Request、1 Commit が理想**
-
-### 例（日本語推奨）
-```bash
-# 良い例
-feat: ✨ #123 ユーザー登録エンドポイントを追加
-fix: 🐛 #124 セッションタイムアウトの問題を修正
-docs: 📝 #125 API仕様書を更新
-feat: #126 映画一覧取得APIを実装
-refactor: #127 ハンドラー関数をリファクタリング
-
-# 避けるべき例
-update code
-fix bug
-add feature
-とりあえず保存
-ログイン機能
-```
-
-### Whyについて
-- **Whyはコミットメッセージではなく、IssueやPull Requestで説明**
-- コミットメッセージにはIssue番号を必ず紐付ける
-- Subject は What に寄った書き方でOK
 
 ## 🗂️ ディレクトリ構造
 
@@ -231,39 +171,22 @@ cd frontend
 - **Projects**: GitHub Projectsでカンバン管理
 - **Milestones**: 週次での進捗管理
 
-### コミュニケーション
-- **日次**: 簡単な進捗共有
-- **Weekly**: 詳細な振り返りとプランニング
-- **困った時**: いつでもSlack/Discordで相談
-
-## 📚 学習リソース
-
-### Go言語
-- [Go Tour (日本語)](https://go-tour-jp.appspot.com/)
-- [RecursionCS Go](https://recursionist.io/learn/languages/go/)
-- [Go公式ドキュメント](https://golang.org/doc/)
-- [Effective Go](https://golang.org/doc/effective_go.html)
-
-### Web API開発
-- [net/httpパッケージ](https://pkg.go.dev/net/http)
-- [JSONの扱い方](https://pkg.go.dev/encoding/json)
-
 ## 🎯 成果物
 
 ### 最終的な提出物
 - [ ] Go製Web API
-- [ ] デモWebアプリケーション
+- [ ] デモWebアプリケーション(フロントエンド・バックエンド)
 - [ ] APIドキュメント（Markdown形式）
 - [ ] README（使用方法・API仕様）
 - [ ] 開発ログ（devlog/内のMarkdownファイル）
 
 ## 👥 チームメンバー
 
-| Name | GitHub | Role | 担当エンドポイント |
-|------|--------|------|-------------------|
-| Takeshi Arihori | [Takeshi Arihori](https://github.com/takeshi-arihori) | Developer | TBD |
+| Name            | GitHub                                                | Role      | 担当エンドポイント |
+| --------------- | ----------------------------------------------------- | --------- | ------------------ |
+| Takeshi Arihori | [Takeshi Arihori](https://github.com/takeshi-arihori) | Developer | TBD                |
 
 ---
 
-**Last Updated**: 2025/06/22  
+**Last Updated**: 2025/06/25  
 **Next Milestone**: 6/25 テーマ決定MTG
