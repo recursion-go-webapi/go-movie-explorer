@@ -168,8 +168,6 @@ cd frontend
 
 ### Issues・Pull Requests
 - **Issues**: 機能実装やバグ報告の単位で作成
-- **Projects**: GitHub Projectsでカンバン管理
-- **Milestones**: 週次での進捗管理
 
 ## 🎯 成果物
 
