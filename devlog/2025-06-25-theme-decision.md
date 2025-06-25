@@ -3,7 +3,7 @@
 ## 📅 日時・概要
 - **日時**: 2025/06/25
 - **種別**: プロジェクトテーマ決定・役割分担MTG
-- **参加者**: チームメンバー5名
+- **参加者**: チームメンバー3名
 
 ## 🎯 決定事項
 
@@ -22,7 +22,7 @@
 ## 👥 役割分担
 
 ### レビュー体制
-| プッシュする人 | レビュワー |
+| PR作成者 | レビュワー |
 | -------------- | ---------- |
 | Masato         | Hiroki     |
 | Hiroki         | Arihori    |
@@ -53,19 +53,19 @@
 
 ### TMDB API
 - **公式ドキュメント**: https://developer.themoviedb.org/docs/getting-started
-- **API Reference**: https://developer.themoviedb.org/reference/account-details
+- **API Reference**: https://developer.themoviedb.org/reference/intro/getting-started
 - **API種別**: REST API
 - **認証**: API Key
 - **料金**: 無料プラン利用
 
 #### 🧪 API実テスト環境
-**重要**: [TMDB API Reference](https://developer.themoviedb.org/reference/account-details)では、各言語（Shell, Node, Ruby, PHP, Python）でのAPI実テストが可能！
+**重要**: [TMDB API Reference](https://developer.themoviedb.org/reference/intro/getting-started)では、各言語（Shell, Node, Ruby, PHP, Python）でのAPI実テストが可能！
 - リアルタイムでAPIレスポンスを確認
 - コードサンプル自動生成
 - 各エンドポイントのパラメータ詳細確認
 
 ### 想定エンドポイント例
-- 映画一覧取得
+- 映画一覧取得: Arihori
 - 映画詳細取得
 - 映画検索
 - 人気映画ランキング
@@ -84,7 +84,7 @@
 
 ## 🚀 次のアクション
 1. **各自**: TMDB APIキー取得
-2. **各自**: [API Reference](https://developer.themoviedb.org/reference/account-details)でAPIテスト実施
+2. **各自**: [API Reference](https://developer.themoviedb.org/reference/intro/getting-started)を参考にAPIテスト実施
 3. **有堀**: 金曜までにデプロイ環境構築
 4. **masato**: ドキュメント作成(API仕様書)
 5. **全員**: 担当エンドポイント設計開始
