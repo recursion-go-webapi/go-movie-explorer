@@ -1,4 +1,4 @@
-module go-web-api
+module go-movie-explorer
 
 go 1.24
 
