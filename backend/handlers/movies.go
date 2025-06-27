@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"go-movie-explorer/models"
+	"go-movie-explorer/services"
 )
 
 // MoviesHandler handles /api/movies requests
@@ -24,26 +24,13 @@ func MoviesHandler(w http.ResponseWriter, r *http.Request) error {
 		_ = l // 仮実装なので未使用
 	}
 
-	// サービス層でTMDB APIから映画一覧を取得（仮実装）
-	// TODO: services.GetMoviesFromTMDB(page, limit) などに置き換え
-	resp := models.MoviesResponse{
-		Page:         page,
-		TotalPages:   1,
-		TotalResults: 1,
-		Movies: []models.Movie{
-			{
-				ID:          1,
-				Title:       "サンプル映画",
-				Overview:    "これはサンプルです",
-				ReleaseDate: "2025-01-01",
-				PosterPath:  "/sample.jpg",
-				VoteAverage: 8.5,
-				Popularity:  123.4,
-			},
-		},
+	// サービス層でTMDB APIから映画一覧を取得
+	moviesResp, err := services.GetMoviesFromTMDB(page)
+	if err != nil {
+		return fmt.Errorf("TMDB API呼び出し失敗: %w", err)
 	}
 
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
+	if err := json.NewEncoder(w).Encode(moviesResp); err != nil {
 		return fmt.Errorf("failed to encode response: %w", err)
 	}
 	return nil

@@ -4,3 +4,5 @@ go 1.24
 
 // 現在は標準ライブラリのみ使用
 // 追加の依存関係はここに記載される
+
+require github.com/joho/godotenv v1.5.1 // indirect
