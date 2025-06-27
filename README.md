@@ -87,13 +87,24 @@ go mod tidy
 ```
 .
 ├── README.md            # プロジェクトの概要・使い方・開発ルール
-├── devlog/              # 開発ログ・MTG記録
-│   └── 2025-06-25-theme-decision.md # テーマ決定MTG記録
+├── devlog/              # 開発ログ・日々の作業記録・MTG記録
+│   ├── 2025-06-25-theme-decision.md         # テーマ決定MTG記録
+│   └── 2025-06-27-tmdb-movie-list-api.md    # TMDB映画一覧API・ログ実装記録
 ├── backend/             # Go言語のWeb APIサーバー
 │   ├── main.go          # アプリケーションのエントリーポイント・HTTPサーバー起動
-│   ├── handlers.go      # HTTPリクエストの処理・エンドポイントのロジック
-│   ├── models.go        # データ構造の定義・JSON変換用の構造体
-│   └── go.mod           # Go言語の依存関係管理ファイル
+│   ├── handlers/        # 各APIエンドポイントのハンドラー群
+│   │   ├── health.go    # ヘルスチェックAPIハンドラー
+│   │   └── movies.go    # 映画一覧APIハンドラー
+│   ├── middleware/      # 共通エラーハンドラ等のミドルウェア
+│   │   └── error_handler.go # 共通エラーハンドラ
+│   ├── models/          # データ構造体定義
+│   │   └── movies.go    # 映画レスポンス構造体
+│   ├── services/        # TMDB APIクライアント等のサービス層
+│   │   └── tmdb.go      # TMDB API呼び出しロジック
+│   ├── logs/            # ログファイル出力用ディレクトリ（.gitignore推奨）
+│   ├── .env.example     # 環境変数テンプレート
+│   ├── go.mod           # Go言語の依存関係管理ファイル
+│   ├── go.sum           # 依存関係の検証用ファイル
 ├── frontend/            # デモWebアプリケーション
 │   ├── index.html       # デモアプリケーション・API動作確認用UI
 │   ├── css/             # スタイルシート格納ディレクトリ
