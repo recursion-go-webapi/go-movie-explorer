@@ -8,8 +8,10 @@ import (
 
 	"go-movie-explorer/handlers"
 	"go-movie-explorer/middleware"
+	"go-movie-explorer/services"
 
 	"github.com/joho/godotenv"
+	"goa.design/clue/health"
 )
 
 // ログ付きハンドラーラッパー
@@ -37,21 +39,34 @@ func main() {
 	defer logFile.Close()
 	log.SetOutput(logFile)
 
-	// 環境変数取得
+	// 環境変数取得(.envファイルに記載したPORTを取得)
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("PORTが設定されていません")
 	}
 	port = ":" + port
 
+	// .envファイルに記載したTMDB_API_KEYを取得
 	tmdbApiKey := os.Getenv("TMDB_API_KEY")
 	if tmdbApiKey == "" {
 		log.Fatal("TMDB_API_KEYが設定されていません")
 	}
 
-	// ルーティング設定（ログ付き）
-	http.HandleFunc("/health", logHandler(middleware.ErrorHandler(handlers.HealthHandler)))
+	// clue/healthによるhealthチェックエンドポイント
+	checker := health.NewChecker(&services.TmdbPinger{})
+	http.Handle("/healthz", health.Handler(checker))
+
+	// 映画一覧取得
 	http.HandleFunc("/api/movies", logHandler(middleware.ErrorHandler(handlers.MoviesHandler)))
+
+	// ルーティング設定（新しいAPIエンドポイントを追加する場合はここに追記）
+	//
+	// - /api/movies/{id}    : 映画詳細取得（今後追加予定）
+	// - /api/movies/search  : 映画検索（今後追加予定）
+	// - /api/movies/popular : 人気映画ランキング（今後追加予定）
+	// - /api/movies/genre   : ジャンル別映画取得（今後追加予定）
+	//
+	// 新しいエンドポイントを追加する場合は、ここにルーティングを追記してください。
 
 	fmt.Printf("Server starting on http://localhost%s\n", port)
 	log.Printf("Server listening on port %s", port)

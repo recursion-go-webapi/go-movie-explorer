@@ -79,6 +79,18 @@ go version
 # 依存関係の確認（go.modファイル作成後）
 cd backend
 go mod tidy
+
+# .envファイルの作成とAPIキー設定
+cp .env.example .env
+# .envをエディタで開き、TMDB_API_KEYなどを自分の値に書き換える
+
+# サーバーの起動
+# （PORTやAPIキーが正しく設定されていることを確認）
+go run main.go
+
+# ヘルスチェック
+# (200 OKが返ってくることを確認)
+curl http://localhost:8080/healthz
 ```
 
 
@@ -136,22 +148,6 @@ go mod tidy
 - **開発過程の記録**
 - MTG議事録・技術的な決定事項・振り返り
 
-### 🔧 開発時の使い方
-
-```bash
-# バックエンド起動
-cd backend
-go run .
-# → http://localhost:8080 でAPI稼働
-
-# デモアプリ確認
-cd frontend
-# index.htmlをブラウザで開く  
-# → デモアプリでAPI動作確認
-
-# APIドキュメント確認
-# docs/api-spec.md をエディタまたはGitHubで閲覧
-```
 
 ### 📋 成果物の構成
 
@@ -177,7 +173,3 @@ cd frontend
 | Name            | GitHub                                                | Role      | 担当エンドポイント |
 | --------------- | ----------------------------------------------------- | --------- | ------------------ |
 | Takeshi Arihori | [Takeshi Arihori](https://github.com/takeshi-arihori) | Developer | TBD                |
-
----
-
-**Last Updated**: 2025/06/25  
