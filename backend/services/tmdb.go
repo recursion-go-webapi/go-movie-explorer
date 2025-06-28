@@ -93,11 +93,57 @@ func GetMoviesFromTMDB(page int) (*models.MoviesResponse, error) {
 }
 
 // --- 映画詳細取得（/movie/{id}）---
-// func GetMovieDetailFromTMDB(id int) (*models.MovieDetail, error) {
-// 	// TODO: 映画詳細取得APIの実装予定
-// 	// 例: /movie/{id} エンドポイントを叩く
-// 	return nil, nil
-// }
+func GetMovieDetailFromTMDB(id int) (*models.MovieDetail, error) {
+	apiKey := GetTMDBApiKey()
+	if apiKey == "" {
+		return nil, fmt.Errorf("TMDB_API_KEYが設定されていません")
+	}
+
+	// APIリクエストURL生成
+	url := fmt.Sprintf("%s/movie/%d", BaseURL, id)
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	// HTTPリクエスト作成
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("リクエスト作成失敗: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Accept", "application/json")
+
+	// TMDB API呼び出し
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("TMDB APIリクエスト失敗: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("TMDB APIエラー: status=%d", resp.StatusCode)
+	}
+	var tmdbResp models.TmdbMovieDetailResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tmdbResp); err != nil {
+		return nil, fmt.Errorf("TMDBレスポンスのデコード失敗: %w", err)
+	}
+
+	// TMDBのレスポンスを独自のMovieDetailに変換
+	return &models.MovieDetail{
+		ID:                tmdbResp.ID,
+		Title:             tmdbResp.Title,
+		OriginalTitle:     tmdbResp.OriginalTitle,
+		Overview:          tmdbResp.Overview,
+		ReleaseDate:       tmdbResp.ReleaseDate,
+		PosterPath:        tmdbResp.PosterPath,
+		BackdropPath:      tmdbResp.BackdropPath,
+		Genres:            tmdbResp.Genres,
+		Homepage:          tmdbResp.Homepage,
+		IMDBID:            tmdbResp.IMDBID,
+		Popularity:        tmdbResp.Popularity,
+		Budget:            tmdbResp.Budget,
+		OriginCountry:     tmdbResp.OriginCountry,
+		OriginalLanguage:  tmdbResp.OriginalLanguage,
+	}, nil
+}
 
 // --- 映画検索（/search/movie）---
 // func SearchMoviesFromTMDB(query string, page int) (*models.MoviesResponse, error) {
