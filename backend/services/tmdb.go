@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -100,11 +101,53 @@ func GetMoviesFromTMDB(page int) (*models.MoviesResponse, error) {
 // }
 
 // --- 映画検索（/search/movie）---
-// func SearchMoviesFromTMDB(query string, page int) (*models.MoviesResponse, error) {
-// 	// TODO: 映画検索APIの実装予定
-// 	// 例: /search/movie?query=...&page=...
-// 	return nil, nil
-// }
+func SearchMoviesFromTMDB(query string, page int) (*models.MoviesResponse, error) {
+	apiKey := GetTMDBApiKey()
+	if apiKey == "" {
+		return nil, fmt.Errorf("TMDB_API_KEYが設定されていません")
+	}
+
+	if query == "" {
+		return nil, fmt.Errorf("検索クエリが指定されていません")
+	}
+
+	// APIリクエストURL生成（クエリパラメータをエスケープ）
+	apiURL := fmt.Sprintf("%s/search/movie?query=%s&page=%d", BaseURL, url.QueryEscape(query), page)
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	// HTTPリクエスト作成
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("リクエスト作成失敗: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Accept", "application/json")
+
+	// TMDB API呼び出し
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("TMDB APIリクエスト失敗: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("TMDB APIエラー: status=%d", resp.StatusCode)
+	}
+
+	// TMDBレスポンスを構造体にデコード
+	var tmdbResp models.TmdbDiscoverResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tmdbResp); err != nil {
+		return nil, fmt.Errorf("TMDBレスポンスのデコード失敗: %w", err)
+	}
+
+	// 独自のMoviesResponseに詰め替え
+	return &models.MoviesResponse{
+		Page:         tmdbResp.Page,
+		TotalPages:   tmdbResp.TotalPages,
+		TotalResults: tmdbResp.TotalResults,
+		Movies:       tmdbResp.Results,
+	}, nil
+}
 
 // --- 人気映画ランキング取得（/movie/popular）---
 // func GetPopularMoviesFromTMDB(page int) (*models.MoviesResponse, error) {
