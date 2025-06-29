@@ -53,6 +53,8 @@ func main() {
 		log.Fatal("TMDB_API_KEYが設定されていません")
 	}
 
+	fmt.Println("TMDB_API_KEY:", tmdbApiKey)
+
 	// clue/healthによるhealthチェックエンドポイント
 	checker := health.NewChecker(&services.TmdbPinger{})
 	http.Handle("/healthz", health.Handler(checker))
@@ -67,6 +69,7 @@ func main() {
 	http.HandleFunc("/api/movies/search", logHandler(middleware.ErrorHandler(handlers.SearchMoviesHandler)))
 
 	// - /api/movies/popular : 人気映画ランキング（今後追加予定）
+	http.HandleFunc("/api/movies/popular", handlers.PopularMoviesHandler)
 	// - /api/movies/genre   : ジャンル別映画取得（今後追加予定）
 	//
 	// 新しいエンドポイントを追加する場合は、ここにルーティングを追記してください。
