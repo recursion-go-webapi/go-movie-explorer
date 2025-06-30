@@ -38,8 +38,6 @@ func MoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// 映画関連APIのハンドラーをまとめるファイル
-//
 // 映画詳細取得ハンドラー /api/movies/{id}
 func MovieDetailHandler(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -74,7 +72,34 @@ func MovieDetailHandler(w http.ResponseWriter, r *http.Request) error {
 	
 }
 
-// - /api/movies/search  : 映画検索（今後追加予定）
+// 映画検索APIハンドラー /api/movies/search
+func SearchMoviesHandler(w http.ResponseWriter, r *http.Request) error {
+	w.Header().Set("Content-Type", "application/json")
+
+	// クエリパラメータ取得
+	query := r.URL.Query().Get("query")
+	if query == "" {
+		return fmt.Errorf("検索クエリが指定されていません")
+	}
+
+	pageStr := r.URL.Query().Get("page")
+	page := 1
+	if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+		page = p
+	}
+
+	// サービス層でTMDB APIから映画検索結果を取得
+	moviesResp, err := services.SearchMoviesFromTMDB(query, page)
+	if err != nil {
+		return fmt.Errorf("TMDB 検索API呼び出し失敗: %w", err)
+	}
+
+	// レスポンスをJSONで返却
+	if err := json.NewEncoder(w).Encode(moviesResp); err != nil {
+		return fmt.Errorf("failed to encode response: %w", err)
+	}
+	return nil
+}
 // - /api/movies/popular : 人気映画ランキング（今後追加予定）
 // - /api/movies/genre   : ジャンル別映画取得（今後追加予定）
 //

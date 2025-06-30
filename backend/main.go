@@ -2,16 +2,17 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 
-	"go-movie-explorer/handlers"
-	"go-movie-explorer/middleware"
-	"go-movie-explorer/services"
+	"go-movie-explorer/handlers"   // ハンドラー
+	"go-movie-explorer/middleware" // ミドルウェア
+	"go-movie-explorer/services"   // サービス層
 
-	"github.com/joho/godotenv"
-	"goa.design/clue/health"
+	"github.com/joho/godotenv" // .envファイルの読み込み
+	"goa.design/clue/health"   // clue/healthによるhealthチェックエンドポイント
 )
 
 // ログ付きハンドラーラッパー
@@ -31,13 +32,13 @@ func main() {
 		log.Fatalf("logsディレクトリの作成に失敗: %v", err)
 	}
 
-	// ログファイル設定
+	// ログファイル設定（コンソールとファイル両方に出力）
 	logFile, err := os.OpenFile("logs/server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("ログファイルを開けません: %v", err)
 	}
 	defer logFile.Close()
-	log.SetOutput(logFile)
+	log.SetOutput(io.MultiWriter(os.Stdout, logFile))
 
 	// 環境変数取得(.envファイルに記載したPORTを取得)
 	port := os.Getenv("PORT")
@@ -59,11 +60,12 @@ func main() {
 	// 映画一覧取得
 	http.HandleFunc("/api/movies", logHandler(middleware.ErrorHandler(handlers.MoviesHandler)))
 
-	// ルーティング設定（新しいAPIエンドポイントを追加する場合はここに追記）
-	//
-	// - /api/movies/{id}    : 映画詳細取得（今後追加予定）
+	// - /api/movies/{id} : 映画詳細取得APIエンドポイント
 	http.HandleFunc("/api/movie/", logHandler(middleware.ErrorHandler(handlers.MovieDetailHandler)))
-	// - /api/movies/search  : 映画検索（今後追加予定）
+
+	// - /api/movies/search：映画検索APIエンドポイント
+	http.HandleFunc("/api/movies/search", logHandler(middleware.ErrorHandler(handlers.SearchMoviesHandler)))
+
 	// - /api/movies/popular : 人気映画ランキング（今後追加予定）
 	// - /api/movies/genre   : ジャンル別映画取得（今後追加予定）
 	//
