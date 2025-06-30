@@ -34,9 +34,54 @@ type TmdbDiscoverResponse struct {
 
 // --- 今後追加予定のエンドポイント用モデル ---
 // 映画詳細取得API用モデル（/movie/{id}）
-// type MovieDetail struct {
-//     // TODO: 映画詳細情報のフィールドを定義
-// }
+type BelongsToCollection struct {
+	ID           int    `json:"id"`
+	Name         string `json:"name"`
+	PosterPath   string `json:"poster_path"`
+	BackdropPath string `json:"backdrop_path"`
+}
+
+type TmdbMovieDetailResponse struct {
+	Adult               bool                  `json:"adult"`
+	BackdropPath        string                `json:"backdrop_path"`
+	BelongsToCollection *BelongsToCollection  `json:"belongs_to_collection,omitempty"`
+	Budget              int                   `json:"budget"`
+	Genres              []Genre               `json:"genres"`
+	Homepage            string                `json:"homepage"`
+	ID                  int                   `json:"id"`
+	IMDBID              string                `json:"imdb_id"`
+	OriginCountry       []string              `json:"origin_country"`
+	OriginalLanguage    string                `json:"original_language"`
+	OriginalTitle       string                `json:"original_title"`
+	Overview            string                `json:"overview"`
+	Popularity          float64               `json:"popularity"`
+	PosterPath          string                `json:"poster_path"`
+	ReleaseDate         string                `json:"release_date"`
+	Title               string                `json:"title"`
+
+}
+
+type MovieDetail struct {
+    ID                int      `json:"id"`
+    Title             string   `json:"title"`
+    OriginalTitle     string   `json:"original_title"`
+    Overview          string   `json:"overview"`
+    ReleaseDate       string   `json:"release_date"`
+    PosterPath        string   `json:"poster_path"`
+    BackdropPath      string   `json:"backdrop_path"`
+    Genres            []Genre  `json:"genres"`
+    Homepage          string   `json:"homepage"`
+    IMDBID            string   `json:"imdb_id"`
+    Popularity        float64  `json:"popularity"`
+    Budget            int      `json:"budget"`
+    OriginCountry     []string `json:"origin_country"`
+    OriginalLanguage  string   `json:"original_language"`
+}
+// ジャンル用モデル
+type Genre struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
 
 // 映画検索API用モデル（/search/movie）
 // type MovieSearchResponse struct {

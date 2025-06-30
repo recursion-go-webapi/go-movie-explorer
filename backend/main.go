@@ -60,10 +60,10 @@ func main() {
 	// 映画一覧取得
 	http.HandleFunc("/api/movies", logHandler(middleware.ErrorHandler(handlers.MoviesHandler)))
 
-	// ルーティング設定（新しいAPIエンドポイントを追加する場合はここに追記）
-	//
-	// - /api/movies/{id}    : 映画詳細取得（今後追加予定）
-	// 映画検索APIエンドポイント: /api/movies/search
+	// - /api/movies/{id} : 映画詳細取得APIエンドポイント
+	http.HandleFunc("/api/movie/", logHandler(middleware.ErrorHandler(handlers.MovieDetailHandler)))
+
+	// - /api/movies/search：映画検索APIエンドポイント
 	http.HandleFunc("/api/movies/search", logHandler(middleware.ErrorHandler(handlers.SearchMoviesHandler)))
 
 	// - /api/movies/popular : 人気映画ランキング（今後追加予定）

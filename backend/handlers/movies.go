@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"go-movie-explorer/services"
 )
@@ -37,9 +38,40 @@ func MoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// 映画関連APIのハンドラーをまとめるファイル
-//
-// - /api/movies/{id}    : 映画詳細取得（今後追加予定）
+// 映画詳細取得ハンドラー /api/movies/{id}
+func MovieDetailHandler(w http.ResponseWriter, r *http.Request) error {
+	w.Header().Set("Content-Type", "application/json")
+	prefix := "/api/movie/"
+	if !strings.HasPrefix(r.URL.Path, prefix) {
+        http.NotFound(w, r)
+        return fmt.Errorf("無効なパス: %s", r.URL.Path)
+    }
+    id := strings.TrimPrefix(r.URL.Path, prefix)
+    if id == "" || strings.Contains(id, "/") {
+        http.NotFound(w, r)
+        return fmt.Errorf("無効な映画ID: %s", id)
+    }
+	// IDを整数に変換
+	movieID, err := strconv.Atoi(id)
+	if err != nil {
+		http.NotFound(w, r)
+		return fmt.Errorf("無効な映画ID: %s", id)
+	}
+	// サービス層でTMDB APIから映画詳細を取得
+	movieDetail, err := services.GetMovieDetailFromTMDB(movieID)
+
+	if err != nil {
+		http.Error(w, fmt.Sprintf("映画詳細取得失敗: %v", err), http.StatusInternalServerError)
+		return fmt.Errorf("映画詳細取得失敗: %w", err)
+	}
+	// レスポンスをJSONで返却
+	if err := json.NewEncoder(w).Encode(movieDetail); err != nil {
+		return fmt.Errorf("failed to encode response: %w", err)
+	}
+	return nil
+	
+}
+
 // 映画検索APIハンドラー /api/movies/search
 func SearchMoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -68,7 +100,6 @@ func SearchMoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	}
 	return nil
 }
-
 // - /api/movies/popular : 人気映画ランキング（今後追加予定）
 // - /api/movies/genre   : ジャンル別映画取得（今後追加予定）
 //
