@@ -101,6 +101,37 @@ func SearchMoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 // - /api/movies/popular : 人気映画ランキング（今後追加予定）
-// - /api/movies/genre   : ジャンル別映画取得（今後追加予定）
 //
 // 新しいエンドポイントを追加する場合は、このファイルにハンドラー関数を追記してください。
+
+func ListMoviesByGenreHandler(w http.ResponseWriter, r *http.Request) error {
+	genreIDStr := r.URL.Query().Get("genre_id")
+	pageStr := r.URL.Query().Get("page")
+
+	if genreIDStr == "" {
+		http.Error(w, "Missing required parameter: genre_id", http.StatusBadRequest)
+		return fmt.Errorf("genre_id が指定されていません")
+	}
+	genreID, err := strconv.Atoi(genreIDStr)
+	if err != nil {
+		http.Error(w, "Invalid parameter: genre_id must be an integer", http.StatusBadRequest)
+		return fmt.Errorf("genre_id の変換に失敗しました: %w", err)
+	}
+
+	page := 1
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+
+	result, err := services.GetMoviesByGenre(genreID, page)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return fmt.Errorf("ジャンルの取得に失敗しました。: %w", err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+	return nil
+}
