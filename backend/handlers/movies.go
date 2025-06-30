@@ -101,6 +101,29 @@ func SearchMoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 // - /api/movies/popular : 人気映画ランキング（今後追加予定）
+func PopularMoviesHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// クエリパラメータ取得
+	page := 1
+	pageStr := r.URL.Query().Get("page")
+	if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+		page = p
+	}
+
+	// サービス呼び出し
+	resp, err := services.GetPopularMoviesFromTMDB(page)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// レスポンス返却
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
+}
+
 // - /api/movies/genre   : ジャンル別映画取得（今後追加予定）
 //
 // 新しいエンドポイントを追加する場合は、このファイルにハンドラー関数を追記してください。
