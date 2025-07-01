@@ -59,6 +59,8 @@ func main() {
 
 	// 映画一覧取得
 	http.HandleFunc("/api/movies", logHandler(middleware.ErrorHandler(handlers.MoviesHandler)))
+	// 映画ジャンル別取得
+	http.HandleFunc("/api/movies/genre", logHandler(middleware.ErrorHandler(handlers.ListMoviesByGenreHandler)))
 
 	// - /api/movies/{id} : 映画詳細取得APIエンドポイント
 	http.HandleFunc("/api/movie/", logHandler(middleware.ErrorHandler(handlers.MovieDetailHandler)))

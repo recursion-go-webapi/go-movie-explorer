@@ -129,20 +129,20 @@ func GetMovieDetailFromTMDB(id int) (*models.MovieDetail, error) {
 
 	// TMDBのレスポンスを独自のMovieDetailに変換
 	return &models.MovieDetail{
-		ID:                tmdbResp.ID,
-		Title:             tmdbResp.Title,
-		OriginalTitle:     tmdbResp.OriginalTitle,
-		Overview:          tmdbResp.Overview,
-		ReleaseDate:       tmdbResp.ReleaseDate,
-		PosterPath:        tmdbResp.PosterPath,
-		BackdropPath:      tmdbResp.BackdropPath,
-		Genres:            tmdbResp.Genres,
-		Homepage:          tmdbResp.Homepage,
-		IMDBID:            tmdbResp.IMDBID,
-		Popularity:        tmdbResp.Popularity,
-		Budget:            tmdbResp.Budget,
-		OriginCountry:     tmdbResp.OriginCountry,
-		OriginalLanguage:  tmdbResp.OriginalLanguage,
+		ID:               tmdbResp.ID,
+		Title:            tmdbResp.Title,
+		OriginalTitle:    tmdbResp.OriginalTitle,
+		Overview:         tmdbResp.Overview,
+		ReleaseDate:      tmdbResp.ReleaseDate,
+		PosterPath:       tmdbResp.PosterPath,
+		BackdropPath:     tmdbResp.BackdropPath,
+		Genres:           tmdbResp.Genres,
+		Homepage:         tmdbResp.Homepage,
+		IMDBID:           tmdbResp.IMDBID,
+		Popularity:       tmdbResp.Popularity,
+		Budget:           tmdbResp.Budget,
+		OriginCountry:    tmdbResp.OriginCountry,
+		OriginalLanguage: tmdbResp.OriginalLanguage,
 	}, nil
 }
 
@@ -203,8 +203,46 @@ func SearchMoviesFromTMDB(query string, page int) (*models.MoviesResponse, error
 // }
 
 // --- ジャンル別映画取得（/discover/movie?with_genres=）---
-// func GetMoviesByGenreFromTMDB(genreID, page int) (*models.MoviesResponse, error) {
-// 	// TODO: ジャンル別映画取得APIの実装予定
-// 	// 例: /discover/movie?with_genres=...&page=...
-// 	return nil, nil
-// }
+func GetMoviesByGenreFromTMDB(genreID, page int) (*models.GenreMovieListResponse, error) {
+	apiKey := GetTMDBApiKey()
+	if apiKey == "" {
+		return nil, fmt.Errorf("TMDB_API_KEYが設定されていません")
+	}
+
+	url := fmt.Sprintf("%s/discover/movie?with_genres=%d&page=%d", BaseURL, genreID, page)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("リクエスト作成失敗: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Accept", "application/json")
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("TMDb APIリクエスト失敗: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("TMDb APIエラー: %s", resp.Status)
+	}
+
+	var tmdbResp models.TMDBGenreMovieList
+	if err := json.NewDecoder(resp.Body).Decode(&tmdbResp); err != nil {
+		return nil, fmt.Errorf("TMDbレスポンスのデコード失敗: %w", err)
+	}
+
+	movies := append([]models.MovieByGenre{}, tmdbResp.Results...)
+
+	return &models.GenreMovieListResponse{
+		GenreID:      genreID,
+		Page:         tmdbResp.Page,
+		PerPage:      len(movies),
+		TotalPages:   tmdbResp.TotalPages,
+		TotalResults: tmdbResp.TotalResults,
+		Results:      movies,
+	}, nil
+}
