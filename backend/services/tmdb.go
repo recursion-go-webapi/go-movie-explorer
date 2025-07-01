@@ -129,20 +129,20 @@ func GetMovieDetailFromTMDB(id int) (*models.MovieDetail, error) {
 
 	// TMDBのレスポンスを独自のMovieDetailに変換
 	return &models.MovieDetail{
-		ID:                tmdbResp.ID,
-		Title:             tmdbResp.Title,
-		OriginalTitle:     tmdbResp.OriginalTitle,
-		Overview:          tmdbResp.Overview,
-		ReleaseDate:       tmdbResp.ReleaseDate,
-		PosterPath:        tmdbResp.PosterPath,
-		BackdropPath:      tmdbResp.BackdropPath,
-		Genres:            tmdbResp.Genres,
-		Homepage:          tmdbResp.Homepage,
-		IMDBID:            tmdbResp.IMDBID,
-		Popularity:        tmdbResp.Popularity,
-		Budget:            tmdbResp.Budget,
-		OriginCountry:     tmdbResp.OriginCountry,
-		OriginalLanguage:  tmdbResp.OriginalLanguage,
+		ID:               tmdbResp.ID,
+		Title:            tmdbResp.Title,
+		OriginalTitle:    tmdbResp.OriginalTitle,
+		Overview:         tmdbResp.Overview,
+		ReleaseDate:      tmdbResp.ReleaseDate,
+		PosterPath:       tmdbResp.PosterPath,
+		BackdropPath:     tmdbResp.BackdropPath,
+		Genres:           tmdbResp.Genres,
+		Homepage:         tmdbResp.Homepage,
+		IMDBID:           tmdbResp.IMDBID,
+		Popularity:       tmdbResp.Popularity,
+		Budget:           tmdbResp.Budget,
+		OriginCountry:    tmdbResp.OriginCountry,
+		OriginalLanguage: tmdbResp.OriginalLanguage,
 	}, nil
 }
 
@@ -203,7 +203,7 @@ func SearchMoviesFromTMDB(query string, page int) (*models.MoviesResponse, error
 // }
 
 // --- ジャンル別映画取得（/discover/movie?with_genres=）---
-func GetMoviesByGenreFromTMDB(genreID, page int) (*models.TMDBGenreMovieList, error) {
+func GetMoviesByGenreFromTMDB(genreID, page int) (*models.GenreMovieListResponse, error) {
 	apiKey := GetTMDBApiKey()
 	if apiKey == "" {
 		return nil, fmt.Errorf("TMDB_API_KEYが設定されていません")
@@ -230,85 +230,19 @@ func GetMoviesByGenreFromTMDB(genreID, page int) (*models.TMDBGenreMovieList, er
 		return nil, fmt.Errorf("TMDb APIエラー: %s", resp.Status)
 	}
 
-	tmdbResp := new(models.TMDBGenreMovieList)
-
-	if err := json.NewDecoder(resp.Body).Decode(tmdbResp); err != nil {
+	var tmdbResp models.TMDBGenreMovieList
+	if err := json.NewDecoder(resp.Body).Decode(&tmdbResp); err != nil {
 		return nil, fmt.Errorf("TMDbレスポンスのデコード失敗: %w", err)
 	}
 
-	return tmdbResp, nil
-}
-
-func GetGenreNameFromID(genreID int) (string, error) {
-	apiKey := GetTMDBApiKey()
-	if apiKey == "" {
-		return "", fmt.Errorf("TMDB_API_KEYが設定されていません")
-	}
-
-	url := fmt.Sprintf("%s/genre/movie/list", BaseURL)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return "", fmt.Errorf("リクエスト作成失敗: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-	req.Header.Set("Accept", "application/json")
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("ジャンル一覧取得失敗: %w", err)
-	}
-	defer resp.Body.Close()
-
-	var genreList models.GenreListResponse
-	if err := json.NewDecoder(resp.Body).Decode(&genreList); err != nil {
-		return "", fmt.Errorf("ジャンル一覧デコード失敗: %w", err)
-	}
-
-	for _, genre := range genreList.Genres {
-		if genre.ID == genreID {
-			return genre.Name, nil
-		}
-	}
-	return "", nil
-}
-
-func GetMoviesByGenre(genreID int, page int) (*models.GenreMovieListResponse, error) {
-	tmdbResp, err := GetMoviesByGenreFromTMDB(genreID, page)
-	if err != nil {
-		return nil, err
-	}
-
-	genreName := ""
-	if genreName == "" {
-		genreName, _ = GetGenreNameFromID(genreID)
-	}
-
-	return ConvertToGenreMovieListResponse(*tmdbResp, genreID, genreName)
-}
-
-func ConvertToGenreMovieListResponse(
-	tmdbResp models.TMDBGenreMovieList,
-	genreID int,
-	genreName string,
-) (*models.GenreMovieListResponse, error) {
-	movies := make([]models.MovieByGenre, 0, len(tmdbResp.Results))
-
-	for _, m := range tmdbResp.Results {
-		movies = append(movies, convertToMovieByGenre(m))
-	}
+	movies := append([]models.MovieByGenre{}, tmdbResp.Results...)
 
 	return &models.GenreMovieListResponse{
 		GenreID:      genreID,
-		GenreName:    genreName,
 		Page:         tmdbResp.Page,
 		PerPage:      len(movies),
 		TotalPages:   tmdbResp.TotalPages,
 		TotalResults: tmdbResp.TotalResults,
 		Results:      movies,
 	}, nil
-}
-
-func convertToMovieByGenre(m models.GenreMoviesResponse) models.MovieByGenre {
-	return models.MovieByGenre(m)
 }

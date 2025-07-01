@@ -118,7 +118,6 @@ type GenreMoviesResponse struct {
 // ジャンル別映画リストのレスポンス構造体
 type GenreMovieListResponse struct {
 	GenreID      int            `json:"genre_id"`
-	GenreName    string         `json:"genre_name,omitempty"`
 	Page         int            `json:"page"`
 	PerPage      int            `json:"per_page"`
 	TotalPages   int            `json:"total_pages"`

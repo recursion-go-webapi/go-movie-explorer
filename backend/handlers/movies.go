@@ -43,14 +43,14 @@ func MovieDetailHandler(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "application/json")
 	prefix := "/api/movie/"
 	if !strings.HasPrefix(r.URL.Path, prefix) {
-        http.NotFound(w, r)
-        return fmt.Errorf("無効なパス: %s", r.URL.Path)
-    }
-    id := strings.TrimPrefix(r.URL.Path, prefix)
-    if id == "" || strings.Contains(id, "/") {
-        http.NotFound(w, r)
-        return fmt.Errorf("無効な映画ID: %s", id)
-    }
+		http.NotFound(w, r)
+		return fmt.Errorf("無効なパス: %s", r.URL.Path)
+	}
+	id := strings.TrimPrefix(r.URL.Path, prefix)
+	if id == "" || strings.Contains(id, "/") {
+		http.NotFound(w, r)
+		return fmt.Errorf("無効な映画ID: %s", id)
+	}
 	// IDを整数に変換
 	movieID, err := strconv.Atoi(id)
 	if err != nil {
@@ -69,7 +69,6 @@ func MovieDetailHandler(w http.ResponseWriter, r *http.Request) error {
 		return fmt.Errorf("failed to encode response: %w", err)
 	}
 	return nil
-	
 }
 
 // 映画検索APIハンドラー /api/movies/search
@@ -100,6 +99,7 @@ func SearchMoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	}
 	return nil
 }
+
 // - /api/movies/popular : 人気映画ランキング（今後追加予定）
 //
 // 新しいエンドポイントを追加する場合は、このファイルにハンドラー関数を追記してください。
@@ -125,7 +125,7 @@ func ListMoviesByGenreHandler(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	result, err := services.GetMoviesByGenre(genreID, page)
+	result, err := services.GetMoviesByGenreFromTMDB(genreID, page)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return fmt.Errorf("ジャンルの取得に失敗しました。: %w", err)
