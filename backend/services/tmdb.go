@@ -78,19 +78,13 @@ func GetMoviesFromTMDB(page int) (*models.MoviesResponse, error) {
 		return nil, fmt.Errorf("TMDB APIエラー: status=%d", resp.StatusCode)
 	}
 
-	// TMDBレスポンスを構造体にデコード
-	var tmdbResp models.TmdbDiscoverResponse
-	if err := json.NewDecoder(resp.Body).Decode(&tmdbResp); err != nil {
+	// TMDBレスポンスを直接MoviesResponseにデコード
+	var moviesResp models.MoviesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&moviesResp); err != nil {
 		return nil, fmt.Errorf("TMDBレスポンスのデコード失敗: %w", err)
 	}
 
-	// 独自のMoviesResponseに詰め替え
-	return &models.MoviesResponse{
-		Page:         tmdbResp.Page,
-		TotalPages:   tmdbResp.TotalPages,
-		TotalResults: tmdbResp.TotalResults,
-		Movies:       tmdbResp.Results,
-	}, nil
+	return &moviesResp, nil
 }
 
 // --- 映画詳細取得（/movie/{id}）---
@@ -180,19 +174,13 @@ func SearchMoviesFromTMDB(query string, page int) (*models.MoviesResponse, error
 		return nil, fmt.Errorf("TMDB APIエラー: status=%d", resp.StatusCode)
 	}
 
-	// TMDBレスポンスを構造体にデコード
-	var tmdbResp models.TmdbDiscoverResponse
-	if err := json.NewDecoder(resp.Body).Decode(&tmdbResp); err != nil {
+	// TMDBレスポンスを直接MoviesResponseにデコード
+	var moviesResp models.MoviesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&moviesResp); err != nil {
 		return nil, fmt.Errorf("TMDBレスポンスのデコード失敗: %w", err)
 	}
 
-	// 独自のMoviesResponseに詰め替え
-	return &models.MoviesResponse{
-		Page:         tmdbResp.Page,
-		TotalPages:   tmdbResp.TotalPages,
-		TotalResults: tmdbResp.TotalResults,
-		Movies:       tmdbResp.Results,
-	}, nil
+	return &moviesResp, nil
 }
 
 // --- 人気映画ランキング取得（/movie/popular）---
