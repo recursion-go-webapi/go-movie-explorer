@@ -7,12 +7,48 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"sync"
 	"time"
 
 	"go-movie-explorer/models"
 )
 
 const BaseURL = "https://api.themoviedb.org/3"
+
+// シングルトンHTTPクライアント
+var (
+	httpClient *http.Client
+	clientOnce sync.Once
+)
+
+// getHTTPClient はシングルトンパターンでHTTPクライアントを取得
+func getHTTPClient() *http.Client {
+	clientOnce.Do(func() {
+		// コネクションプールとKeep-Alive設定
+		transport := &http.Transport{
+			MaxIdleConns:        100,              // 最大アイドル接続数
+			MaxConnsPerHost:     10,               // ホスト毎の最大接続数
+			MaxIdleConnsPerHost: 10,               // ホスト毎の最大アイドル接続数
+			IdleConnTimeout:     90 * time.Second, // アイドル接続のタイムアウト
+		}
+		
+		httpClient = &http.Client{
+			Transport: transport,
+			Timeout:   10 * time.Second, // デフォルトタイムアウト
+		}
+	})
+	return httpClient
+}
+
+// getPingHTTPClient はPing用の短いタイムアウトを持つクライアントを取得
+func getPingHTTPClient() *http.Client {
+	baseClient := getHTTPClient()
+	// Ping用に5秒タイムアウトのクライアントを作成（Transportは共有）
+	return &http.Client{
+		Transport: baseClient.Transport,
+		Timeout:   5 * time.Second,
+	}
+}
 
 // TMDBのAPIキーを環境変数から取得
 func GetTMDBApiKey() string {
@@ -36,7 +72,7 @@ func (t *TmdbPinger) Ping(ctx context.Context) error {
 	}
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 	req.Header.Set("Accept", "application/json")
-	client := &http.Client{Timeout: 5 * time.Second}
+	client := getPingHTTPClient()
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("TMDB Pingリクエスト失敗: %w", err)
@@ -57,7 +93,7 @@ func GetMoviesFromTMDB(page int) (*models.MoviesResponse, error) {
 
 	// APIリクエストURL生成
 	url := fmt.Sprintf("%s/discover/movie?page=%d", BaseURL, page)
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := getHTTPClient()
 
 	// HTTPリクエスト作成
 	req, err := http.NewRequest("GET", url, nil)
@@ -96,7 +132,7 @@ func GetMovieDetailFromTMDB(id int) (*models.MovieDetail, error) {
 
 	// APIリクエストURL生成
 	url := fmt.Sprintf("%s/movie/%d", BaseURL, id)
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := getHTTPClient()
 
 	// HTTPリクエスト作成
 	req, err := http.NewRequest("GET", url, nil)
@@ -153,7 +189,7 @@ func SearchMoviesFromTMDB(query string, page int) (*models.MoviesResponse, error
 
 	// APIリクエストURL生成（クエリパラメータをエスケープ）
 	apiURL := fmt.Sprintf("%s/search/movie?query=%s&page=%d", BaseURL, url.QueryEscape(query), page)
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := getHTTPClient()
 
 	// HTTPリクエスト作成
 	req, err := http.NewRequest("GET", apiURL, nil)
@@ -206,7 +242,7 @@ func GetMoviesByGenreFromTMDB(genreID, page int) (*models.GenreMovieListResponse
 
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 	req.Header.Set("Accept", "application/json")
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := getHTTPClient()
 
 	resp, err := client.Do(req)
 	if err != nil {

@@ -2,7 +2,9 @@ package services
 
 import (
 	"context"
+	"net/http"
 	"os"
+	"sync"
 	"testing"
 	"time"
 )
@@ -147,5 +149,67 @@ func TestGetTMDBApiKey(t *testing.T) {
 	key = GetTMDBApiKey()
 	if key != expectedKey {
 		t.Errorf("Expected '%s', got '%s'", expectedKey, key)
+	}
+}
+
+// TestHTTPClientSingleton - シングルトンHTTPクライアントのテスト
+func TestHTTPClientSingleton(t *testing.T) {
+	// 同じインスタンスが返されることを確認
+	client1 := getHTTPClient()
+	client2 := getHTTPClient()
+	
+	if client1 != client2 {
+		t.Error("Expected same HTTP client instance, but got different instances")
+	}
+	
+	// クライアントの設定確認
+	if client1.Timeout != 10*time.Second {
+		t.Errorf("Expected timeout 10s, got %v", client1.Timeout)
+	}
+	
+	// Transportが設定されていることを確認
+	if client1.Transport == nil {
+		t.Error("Expected Transport to be set")
+	}
+}
+
+// TestPingHTTPClient - Ping用HTTPクライアントのテスト
+func TestPingHTTPClient(t *testing.T) {
+	pingClient := getPingHTTPClient()
+	
+	// タイムアウトが5秒に設定されていることを確認
+	if pingClient.Timeout != 5*time.Second {
+		t.Errorf("Expected ping client timeout 5s, got %v", pingClient.Timeout)
+	}
+	
+	// 通常クライアントとTransportが共有されていることを確認
+	normalClient := getHTTPClient()
+	if pingClient.Transport != normalClient.Transport {
+		t.Error("Expected ping client to share Transport with normal client")
+	}
+}
+
+// TestHTTPClientConcurrency - 並行アクセスでのシングルトンテスト
+func TestHTTPClientConcurrency(t *testing.T) {
+	const goroutines = 100
+	clients := make([]*http.Client, goroutines)
+	
+	// 並行してHTTPクライアントを取得
+	var wg sync.WaitGroup
+	for i := 0; i < goroutines; i++ {
+		wg.Add(1)
+		go func(index int) {
+			defer wg.Done()
+			clients[index] = getHTTPClient()
+		}(i)
+	}
+	wg.Wait()
+	
+	// 全て同じインスタンスであることを確認
+	firstClient := clients[0]
+	for i := 1; i < goroutines; i++ {
+		if clients[i] != firstClient {
+			t.Errorf("Client %d is different from first client", i)
+		}
 	}
 }
