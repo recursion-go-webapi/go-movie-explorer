@@ -37,8 +37,6 @@ func DefaultSecurityConfig() *SecurityConfig {
 		// CORS設定
 		AllowedOrigins: []string{
 			frontendURL,
-			"http://localhost:3000", // React開発サーバー
-			"http://127.0.0.1:3000", // ローカルアクセス
 		},
 		AllowedMethods: []string{
 			"GET", "POST", "PUT", "DELETE", "OPTIONS",

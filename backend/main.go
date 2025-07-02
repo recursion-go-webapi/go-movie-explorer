@@ -14,13 +14,6 @@ import (
 	"goa.design/clue/health"   // clue/healthによるhealthチェックエンドポイント
 )
 
-// ログ付きハンドラーラッパー
-func logHandler(handler http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("[%s] %s", r.Method, r.URL.Path)
-		handler(w, r)
-	}
-}
 
 func main() {
 	// .env読み込み
@@ -69,15 +62,15 @@ func main() {
 	mux.Handle("/healthz", health.Handler(checker))
 
 	// 映画一覧取得
-	mux.HandleFunc("/api/movies", logHandler(middleware.ErrorHandler(handlers.MoviesHandler)))
+	mux.HandleFunc("/api/movies", middleware.LoggingHandler(handlers.MoviesHandler))
 	// 映画ジャンル別取得
-	mux.HandleFunc("/api/movies/genre", logHandler(middleware.ErrorHandler(handlers.ListMoviesByGenreHandler)))
+	mux.HandleFunc("/api/movies/genre", middleware.LoggingHandler(handlers.ListMoviesByGenreHandler))
 
 	// - /api/movies/{id} : 映画詳細取得APIエンドポイント
-	mux.HandleFunc("/api/movie/", logHandler(middleware.ErrorHandler(handlers.MovieDetailHandler)))
+	mux.HandleFunc("/api/movie/", middleware.LoggingHandler(handlers.MovieDetailHandler))
 
 	// - /api/movies/search：映画検索APIエンドポイント
-	mux.HandleFunc("/api/movies/search", logHandler(middleware.ErrorHandler(handlers.SearchMoviesHandler)))
+	mux.HandleFunc("/api/movies/search", middleware.LoggingHandler(handlers.SearchMoviesHandler))
 	
 	// セキュリティミドルウェアを全体に適用
 	securedHandler := middleware.SecurityMiddleware(securityConfig)(mux)
