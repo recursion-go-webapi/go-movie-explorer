@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -53,29 +52,45 @@ func main() {
 		log.Fatal("TMDB_API_KEYが設定されていません")
 	}
 
+	// セキュリティミドルウェアの設定
+	securityConfig := middleware.DefaultSecurityConfig()
+	
+	// 本番環境の場合はより厳格な設定を使用
+	if os.Getenv("GO_ENV") == "production" {
+		frontendURL := os.Getenv("FRONTEND_URL")
+		securityConfig = middleware.ProductionSecurityConfig(frontendURL)
+	}
+	
+	// ルートマルチプレクサーを作成
+	mux := http.NewServeMux()
+	
 	// clue/healthによるhealthチェックエンドポイント
 	checker := health.NewChecker(&services.TmdbPinger{})
-	http.Handle("/healthz", health.Handler(checker))
+	mux.Handle("/healthz", health.Handler(checker))
 
 	// 映画一覧取得
-	http.HandleFunc("/api/movies", logHandler(middleware.ErrorHandler(handlers.MoviesHandler)))
+	mux.HandleFunc("/api/movies", logHandler(middleware.ErrorHandler(handlers.MoviesHandler)))
 	// 映画ジャンル別取得
-	http.HandleFunc("/api/movies/genre", logHandler(middleware.ErrorHandler(handlers.ListMoviesByGenreHandler)))
+	mux.HandleFunc("/api/movies/genre", logHandler(middleware.ErrorHandler(handlers.ListMoviesByGenreHandler)))
 
 	// - /api/movies/{id} : 映画詳細取得APIエンドポイント
-	http.HandleFunc("/api/movie/", logHandler(middleware.ErrorHandler(handlers.MovieDetailHandler)))
+	mux.HandleFunc("/api/movie/", logHandler(middleware.ErrorHandler(handlers.MovieDetailHandler)))
 
 	// - /api/movies/search：映画検索APIエンドポイント
-	http.HandleFunc("/api/movies/search", logHandler(middleware.ErrorHandler(handlers.SearchMoviesHandler)))
+	mux.HandleFunc("/api/movies/search", logHandler(middleware.ErrorHandler(handlers.SearchMoviesHandler)))
+	
+	// セキュリティミドルウェアを全体に適用
+	securedHandler := middleware.SecurityMiddleware(securityConfig)(mux)
 
 	// - /api/movies/popular : 人気映画ランキング（今後追加予定）
 	// - /api/movies/genre   : ジャンル別映画取得（今後追加予定）
 	//
 	// 新しいエンドポイントを追加する場合は、ここにルーティングを追記してください。
 
-	fmt.Printf("Server starting on http://localhost%s\n", port)
+	log.Printf("Server starting on http://localhost%s\n", port)
 	log.Printf("Server listening on port %s", port)
+	log.Printf("Security middleware enabled with CORS origins: %v", securityConfig.AllowedOrigins)
 
-	// サーバー起動
-	log.Fatal(http.ListenAndServe(port, nil))
+	// サーバー起動（セキュリティミドルウェア適用済み）
+	log.Fatal(http.ListenAndServe(port, securedHandler))
 }
