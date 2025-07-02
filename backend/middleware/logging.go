@@ -23,8 +23,13 @@ func LoggingHandler(h AppHandler) http.HandlerFunc {
 			// エラーログの出力
 			log.Printf("[%s] %s - Error: %v", r.Method, r.URL.Path, err)
 
-			// クライアントにエラーレスポンスを返す
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			// APIErrorの場合は適切なステータスコードでレスポンス
+			if apiErr, ok := err.(*APIError); ok {
+				http.Error(w, apiErr.Message, apiErr.StatusCode)
+			} else {
+				// その他のエラーは500 Internal Server Error
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			}
 		} else {
 			// 成功時のログ出力（実行時間も含む）
 			duration := time.Since(start)

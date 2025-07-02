@@ -14,10 +14,11 @@ import (
 	"goa.design/clue/health"   // clue/healthによるhealthチェックエンドポイント
 )
 
-
 func main() {
 	// .env読み込み
-	_ = godotenv.Load(".env")
+	if err := godotenv.Load(".env"); err != nil {
+		log.Fatalf(".envファイルを設定してください: %v", err)
+	}
 
 	// logsディレクトリ自動作成
 	if err := os.MkdirAll("logs", 0755); err != nil {
@@ -47,16 +48,16 @@ func main() {
 
 	// セキュリティミドルウェアの設定
 	securityConfig := middleware.DefaultSecurityConfig()
-	
+
 	// 本番環境の場合はより厳格な設定を使用
 	if os.Getenv("GO_ENV") == "production" {
 		frontendURL := os.Getenv("FRONTEND_URL")
 		securityConfig = middleware.ProductionSecurityConfig(frontendURL)
 	}
-	
+
 	// ルートマルチプレクサーを作成
 	mux := http.NewServeMux()
-	
+
 	// clue/healthによるhealthチェックエンドポイント
 	checker := health.NewChecker(&services.TmdbPinger{})
 	mux.Handle("/healthz", health.Handler(checker))
@@ -71,7 +72,7 @@ func main() {
 
 	// - /api/movies/search：映画検索APIエンドポイント
 	mux.HandleFunc("/api/movies/search", middleware.LoggingHandler(handlers.SearchMoviesHandler))
-	
+
 	// セキュリティミドルウェアを全体に適用
 	securedHandler := middleware.SecurityMiddleware(securityConfig)(mux)
 
