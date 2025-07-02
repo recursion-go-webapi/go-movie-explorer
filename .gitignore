@@ -25,3 +25,6 @@ Thumbs.db
 *.dll
 *.so
 *.dylib
+
+# テスト関連
+coverage.*

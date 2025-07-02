@@ -1,12 +1,6 @@
 package models
 
-// 映画一覧取得用モデル
-// TMDB APIの生レスポンス（resultsフィールド）→ アプリのレスポンス（moviesフィールド）に詰め替えて返す設計です。
-// 例：
-// TMDB:   { ..., "results": [ { ... }, ... ] }
-// アプリ: { ..., "movies":  [ { ... }, ... ] }
-
-// 映画一覧取得
+// 映画一覧取得用モデル (/discover/movie)
 type Movie struct {
 	ID          int     `json:"id"`
 	Title       string  `json:"title"`
@@ -21,19 +15,11 @@ type MoviesResponse struct {
 	Page         int     `json:"page"`
 	TotalPages   int     `json:"total_pages"`
 	TotalResults int     `json:"total_results"`
-	Movies       []Movie `json:"movies"`
-}
-
-// TMDB APIのレスポンスに合わせた構造体
-type TmdbDiscoverResponse struct {
-	Page         int     `json:"page"`
-	TotalPages   int     `json:"total_pages"`
-	TotalResults int     `json:"total_results"`
 	Results      []Movie `json:"results"`
 }
 
-// --- 今後追加予定のエンドポイント用モデル ---
-// 映画詳細取得API用モデル（/movie/{id}）
+
+// 映画詳細取得API用モデル（/discover/movie/{id}）
 type BelongsToCollection struct {
 	ID           int    `json:"id"`
 	Name         string `json:"name"`
@@ -82,11 +68,6 @@ type Genre struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
-
-// 映画検索API用モデル（/search/movie）
-// type MovieSearchResponse struct {
-//     // TODO: 検索結果用のフィールドを定義
-// }
 
 // 人気映画ランキングAPI用モデル（/movie/popular）
 // type PopularMoviesResponse struct {
