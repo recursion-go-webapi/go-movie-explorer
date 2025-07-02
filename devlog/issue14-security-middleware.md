@@ -140,6 +140,98 @@ curl -I -X OPTIONS -H "Origin: .env.localのFRONTEND_URL" -H "Access-Control-Req
 
 **結果**: `204 No Content` - プリフライトリクエスト成功
 
+## 🌐 CORSテスト方法
+
+### 1. 許可されたOriginからのリクエストテスト
+
+```bash
+# 許可されているOrigin (http://localhost:3003) からのリクエスト
+curl -v -H "Origin: http://localhost:3003" \
+  -H "Access-Control-Request-Method: GET" \
+  -H "Access-Control-Request-Headers: Content-Type" \
+  -X OPTIONS "http://localhost:8080/api/movies"
+
+# 期待結果: 
+# < HTTP/1.1 200 OK
+# < Access-Control-Allow-Origin: http://localhost:3003
+# < Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+```
+
+### 2. 許可されていないOriginからのリクエストテスト
+
+```bash
+# 許可されていないOrigin からのリクエスト
+curl -v -H "Origin: http://malicious-site.com" \
+  -H "Access-Control-Request-Method: GET" \
+  -X OPTIONS "http://localhost:8080/api/movies"
+
+# 期待結果:
+# < HTTP/1.1 200 OK
+# Access-Control-Allow-Origin ヘッダーが含まれない（セキュリティ）
+```
+
+### 3. 実際のCORSリクエストテスト
+
+```bash
+# プリフライトリクエスト（OPTIONS）
+curl -v -H "Origin: http://localhost:3003" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: Content-Type" \
+  -X OPTIONS "http://localhost:8080/api/movies"
+
+# 実際のリクエスト（GET）
+curl -v -H "Origin: http://localhost:3003" \
+  -X GET "http://localhost:8080/api/movies"
+```
+
+### 4. ブラウザーでのCORSテスト
+
+**JavaScript Console で実行**:
+```javascript
+// 許可されたOriginからのテスト（開発者ツールのConsoleで）
+fetch('http://localhost:8080/api/movies', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+.then(response => response.json())
+.then(data => console.log('Success:', data))
+.catch(error => console.error('CORS Error:', error));
+```
+
+### 5. CORSテスト結果分析
+
+#### ✅ 許可されたOrigin (`http://localhost:3003`):
+```bash
+$ curl -v -H "Origin: http://localhost:3003" -X OPTIONS "http://localhost:8080/api/movies"
+> OPTIONS /api/movies HTTP/1.1
+> Origin: http://localhost:3003
+< HTTP/1.1 204 No Content
+< Access-Control-Allow-Origin: http://localhost:3003  ← 正常
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+< Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorization, X-Requested-With, X-HTTP-Method-Override
+```
+
+#### ⚠️ 許可されていないOrigin (`http://malicious-site.com`):
+```bash
+$ curl -v -H "Origin: http://malicious-site.com" -X OPTIONS "http://localhost:8080/api/movies"
+> OPTIONS /api/movies HTTP/1.1
+> Origin: http://malicious-site.com  
+< HTTP/1.1 204 No Content
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+(Access-Control-Allow-Originヘッダーなし)  ← セキュリティで正常
+```
+
+### CORSの正常動作確認
+
+**期待通りの動作**:
+1. **許可Origin**: `Access-Control-Allow-Origin`ヘッダー付与
+2. **未許可Origin**: `Access-Control-Allow-Origin`ヘッダーなし
+3. **共通ヘッダー**: `Access-Control-Allow-Methods`等は常に返される
+
+**これがCORSセキュリティの正しい実装です！**
+
 ## 🌟 セキュリティ効果
 
 ### 1. **XSS攻撃防止**
