@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Movie, MoviesResponse } from '@/types/movie';
-import { apiClient } from '@/api';
+import { getMovies, searchMovies as searchMoviesApi } from '@/api';
 
 export function useMovies() {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -17,11 +17,11 @@ export function useMovies() {
 
     try {
       let response: MoviesResponse;
-      
+
       if (query) {
-        response = await apiClient.searchMovies(query, page);
+        response = await searchMoviesApi(query, page);
       } else {
-        response = await apiClient.getMovies(page);
+        response = await getMovies(page);
       }
 
       setMovies(response.results);
