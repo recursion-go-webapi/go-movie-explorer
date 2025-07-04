@@ -62,7 +62,7 @@ func MovieDetailHandler(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return middleware.NewInternalServerError(fmt.Sprintf("映画詳細取得失敗: %v", err))
 	}
-	
+
 	w.WriteHeader(http.StatusOK)
 	// レスポンスをJSONで返却
 	if err := json.NewEncoder(w).Encode(movieDetail); err != nil {
@@ -132,5 +132,23 @@ func ListMoviesByGenreHandler(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
+	return nil
+}
+
+// ジャンル一覧取得APIハンドラー  /api/genres
+func GenresHandler(w http.ResponseWriter, r *http.Request) error {
+	w.Header().Set("Content-Type", "application/json")
+
+	// サービス層でTMDB APIからジャンル一覧を取得
+	genresResp, err := services.GetGenresFromTMDB()
+	if err != nil {
+		return middleware.NewInternalServerError(fmt.Sprintf("TMDB ジャンル一覧の取得に呼び出し失敗しました: %v", err))
+	}
+
+	w.WriteHeader(http.StatusOK)
+	// レスポンスをJSONで返却
+	if err := json.NewEncoder(w).Encode(genresResp); err != nil {
+		return middleware.NewInternalServerError(fmt.Sprintf("JSONレスポンスのエンコードに失敗しました: %v", err))
+	}
 	return nil
 }

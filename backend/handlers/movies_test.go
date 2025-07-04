@@ -35,7 +35,7 @@ func TestMoviesHandler(t *testing.T) {
 				if contentType != "application/json" {
 					t.Errorf("Expected Content-Type 'application/json', got '%s'", contentType)
 				}
-				
+
 				// レスポンスが有効なJSONかチェック
 				var response models.MoviesResponse
 				err := json.NewDecoder(recorder.Body).Decode(&response)
@@ -56,14 +56,14 @@ func TestMoviesHandler(t *testing.T) {
 				if recorder.Code != http.StatusOK {
 					t.Skip("TMDB API connection failed, skipping test")
 				}
-				
+
 				var response models.MoviesResponse
 				err := json.NewDecoder(recorder.Body).Decode(&response)
 				if err != nil {
 					t.Errorf("Failed to decode JSON response: %v", err)
 					return
 				}
-				
+
 				// ページ番号の確認（TMDB APIが成功した場合のみ）
 				if response.Page != 2 {
 					t.Errorf("Expected page 2, got %d", response.Page)
@@ -451,6 +451,58 @@ func TestQueryParameterParsing(t *testing.T) {
 			}
 			if limit != tt.expectedLimit {
 				t.Errorf("Expected limit %d, got %d", tt.expectedLimit, limit)
+			}
+		})
+	}
+}
+
+// TestGenresHandler - ジャンル一覧取得ハンドラーのテスト
+func TestGenresHandlerWithServeMux(t *testing.T) {
+	if os.Getenv("TMDB_API_KEY") == "" {
+		t.Skip("TMDB_API_KEY not set, skipping integration test")
+	}
+
+	// ServeMuxを使用してハンドラーを登録
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/genres", func(w http.ResponseWriter, r *http.Request) {
+		_ = GenresHandler(w, r)
+	})
+
+	tests := []struct {
+		name           string
+		method         string
+		path           string
+		expectedStatus int
+	}{
+		{
+			name:           "正常なパス",
+			method:         "GET",
+			path:           "/api/genres",
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "不正なパス（タイポ）",
+			method:         "GET",
+			path:           "/api/genre",
+			expectedStatus: http.StatusNotFound,
+		},
+		{
+			name:           "不正なパス（スラッシュ付き）",
+			method:         "GET",
+			path:           "/api/genres/",
+			expectedStatus: http.StatusNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(tt.method, tt.path, nil)
+			rec := httptest.NewRecorder()
+
+			mux.ServeHTTP(rec, req)
+
+			if rec.Code != tt.expectedStatus {
+				t.Errorf("Expected status %d, got %d", tt.expectedStatus, rec.Code)
 			}
 		})
 	}

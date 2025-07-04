@@ -31,7 +31,7 @@ func getHTTPClient() *http.Client {
 			MaxIdleConnsPerHost: 10,               // ホスト毎の最大アイドル接続数
 			IdleConnTimeout:     90 * time.Second, // アイドル接続のタイムアウト
 		}
-		
+
 		httpClient = &http.Client{
 			Transport: transport,
 			Timeout:   10 * time.Second, // デフォルトタイムアウト
@@ -269,4 +269,40 @@ func GetMoviesByGenreFromTMDB(genreID, page int) (*models.GenreMovieListResponse
 		TotalResults: tmdbResp.TotalResults,
 		Results:      movies,
 	}, nil
+}
+
+// --- ジャンル一覧取得（/genre/movie/list）---
+func GetGenresFromTMDB() (*models.GenreListResponse, error) {
+	apiKey := GetTMDBApiKey()
+	if apiKey == "" {
+		return nil, fmt.Errorf("TMDB_API_KEYが設定されていません")
+	}
+	url := fmt.Sprintf("%s/genre/movie/list", BaseURL)
+	client := getHTTPClient()
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("リクエスト作成失敗: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("TMDB APPリクエスト失敗: %w", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("TMDB APIエラー: status=%d", resp.StatusCode)
+	}
+
+	// TMDBレスポンスを直接GenreListResponseにデコード
+	var tmdbResp models.GenreListResponse
+	if err := json.NewDecoder(resp.Body).Decode(&tmdbResp); err != nil {
+		return nil, fmt.Errorf("TMDBレスポンスのデコード失敗: %w", err)
+	}
+
+	return &tmdbResp, nil
 }
