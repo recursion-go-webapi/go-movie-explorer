@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"go-movie-explorer/middleware"
 	"go-movie-explorer/services"
+	"go-movie-explorer/utils"
 )
 
 // 映画一覧取得APIハンドラー /api/movies
@@ -16,16 +16,30 @@ func MoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	// クエリパラメータ取得（今後、検索条件やソート条件などを追加する場合はここを編集）
+	// クエリパラメータ取得とバリデーション
 	pageStr := r.URL.Query().Get("page")
 	limitStr := r.URL.Query().Get("limit")
-	page := 1
-	if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
-		page = p
+	
+	// ページ番号のバリデーション
+	page, err := utils.ValidatePage(pageStr)
+	if err != nil {
+		if utils.IsValidationError(err) {
+			return middleware.NewBadRequestError(err.Error())
+		}
+		return middleware.NewInternalServerError(fmt.Sprintf("ページ番号の検証中にエラーが発生しました: %v", err))
 	}
-	if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
-		_ = l // 仮実装なので未使用（ページネーションや件数制限を実装する場合はここを編集）
+	
+	// 件数制限のバリデーション
+	limit, err := utils.ValidateLimit(limitStr)
+	if err != nil {
+		if utils.IsValidationError(err) {
+			return middleware.NewBadRequestError(err.Error())
+		}
+		return middleware.NewInternalServerError(fmt.Sprintf("件数制限の検証中にエラーが発生しました: %v", err))
 	}
+	
+	// 現在はlimitは使用していないが、将来的に使用する予定
+	_ = limit
 
 	// サービス層でTMDB APIから映画一覧を取得（API仕様変更や他サービス連携時はここを編集）
 	moviesResp, err := services.GetMoviesFromTMDB(page)
@@ -48,13 +62,14 @@ func MovieDetailHandler(w http.ResponseWriter, r *http.Request) error {
 		return middleware.NewBadRequestError(fmt.Sprintf("無効なパス: %s", r.URL.Path))
 	}
 	id := strings.TrimPrefix(r.URL.Path, prefix)
-	if id == "" || strings.Contains(id, "/") {
-		return middleware.NewBadRequestError(fmt.Sprintf("無効な映画ID: %s", id))
-	}
-	// IDを整数に変換
-	movieID, err := strconv.Atoi(id)
+	
+	// 映画IDのバリデーション
+	movieID, err := utils.ValidateMovieID(id)
 	if err != nil {
-		return middleware.NewBadRequestError(fmt.Sprintf("無効な映画ID: %s", id))
+		if utils.IsValidationError(err) {
+			return middleware.NewBadRequestError(err.Error())
+		}
+		return middleware.NewInternalServerError(fmt.Sprintf("映画IDの検証中にエラーが発生しました: %v", err))
 	}
 	// サービス層でTMDB APIから映画詳細を取得
 	movieDetail, err := services.GetMovieDetailFromTMDB(movieID)
@@ -75,16 +90,25 @@ func MovieDetailHandler(w http.ResponseWriter, r *http.Request) error {
 func SearchMoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "application/json")
 
-	// クエリパラメータ取得
+	// クエリパラメータ取得とバリデーション
 	query := r.URL.Query().Get("query")
-	if query == "" {
-		return middleware.NewBadRequestError("検索クエリが指定されていません")
+	
+	// 検索クエリのバリデーション
+	if err := utils.ValidateSearchQuery(query); err != nil {
+		if utils.IsValidationError(err) {
+			return middleware.NewBadRequestError(err.Error())
+		}
+		return middleware.NewInternalServerError(fmt.Sprintf("検索クエリの検証中にエラーが発生しました: %v", err))
 	}
 
+	// ページ番号のバリデーション
 	pageStr := r.URL.Query().Get("page")
-	page := 1
-	if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
-		page = p
+	page, err := utils.ValidatePage(pageStr)
+	if err != nil {
+		if utils.IsValidationError(err) {
+			return middleware.NewBadRequestError(err.Error())
+		}
+		return middleware.NewInternalServerError(fmt.Sprintf("ページ番号の検証中にエラーが発生しました: %v", err))
 	}
 
 	// サービス層でTMDB APIから映画検索結果を取得
@@ -109,19 +133,22 @@ func ListMoviesByGenreHandler(w http.ResponseWriter, r *http.Request) error {
 	genreIDStr := r.URL.Query().Get("genre_id")
 	pageStr := r.URL.Query().Get("page")
 
-	if genreIDStr == "" {
-		return middleware.NewBadRequestError("genre_id が指定されていません")
-	}
-	genreID, err := strconv.Atoi(genreIDStr)
+	// ジャンルIDのバリデーション
+	genreID, err := utils.ValidateGenreID(genreIDStr)
 	if err != nil {
-		return middleware.NewBadRequestError(fmt.Sprintf("genre_id の変換に失敗しました: %v", err))
+		if utils.IsValidationError(err) {
+			return middleware.NewBadRequestError(err.Error())
+		}
+		return middleware.NewInternalServerError(fmt.Sprintf("ジャンルIDの検証中にエラーが発生しました: %v", err))
 	}
 
-	page := 1
-	if pageStr != "" {
-		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
-			page = p
+	// ページ番号のバリデーション
+	page, err := utils.ValidatePage(pageStr)
+	if err != nil {
+		if utils.IsValidationError(err) {
+			return middleware.NewBadRequestError(err.Error())
 		}
+		return middleware.NewInternalServerError(fmt.Sprintf("ページ番号の検証中にエラーが発生しました: %v", err))
 	}
 
 	result, err := services.GetMoviesByGenreFromTMDB(genreID, page)
