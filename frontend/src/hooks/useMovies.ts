@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import type { Movie, MoviesResponse } from '@/types/movie';
 import { getMovies, searchMovies as searchMoviesApi } from '@/api';
 
 export function useMovies() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [totalResults, setTotalResults] = useState(0);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  
+  // URLクエリパラメータから現在の状態を取得
+  const currentPage = parseInt(searchParams.get('page') || '1');
+  const searchQuery = searchParams.get('query') || '';
 
   const fetchMovies = async (page: number = 1, query?: string) => {
     setLoading(true);
@@ -25,7 +29,6 @@ export function useMovies() {
       }
 
       setMovies(response.results);
-      setCurrentPage(response.page);
       setTotalPages(response.total_pages);
       setTotalResults(response.total_results);
     } catch (err) {
@@ -37,20 +40,22 @@ export function useMovies() {
   };
 
   const searchMovies = (query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1);
-    fetchMovies(1, query);
+    const newParams = new URLSearchParams();
+    newParams.set('query', query);
+    newParams.set('page', '1');
+    setSearchParams(newParams);
   };
 
   const clearSearch = () => {
-    setSearchQuery('');
-    setCurrentPage(1);
-    fetchMovies(1);
+    const newParams = new URLSearchParams();
+    newParams.set('page', '1');
+    setSearchParams(newParams);
   };
 
   const goToPage = (page: number) => {
-    setCurrentPage(page);
-    fetchMovies(page, searchQuery || undefined);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('page', page.toString());
+    setSearchParams(newParams);
   };
 
   const refresh = () => {
@@ -58,8 +63,16 @@ export function useMovies() {
   };
 
   useEffect(() => {
-    fetchMovies();
-  }, []);
+    // 初回ロード時にページ番号がURLにない場合は page=1 を設定
+    if (!searchParams.has('page')) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('page', '1');
+      setSearchParams(newParams, { replace: true });
+    } else {
+      // URLパラメータがある場合は映画を取得
+      fetchMovies(currentPage, searchQuery || undefined);
+    }
+  }, [searchParams]);
 
   return {
     movies,

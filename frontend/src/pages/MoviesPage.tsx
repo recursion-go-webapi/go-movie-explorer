@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMovies } from '@/hooks/useMovies';
 import { MovieGrid } from '@/components/MovieGrid';
@@ -7,7 +7,6 @@ import type { Movie } from '@/types/movie';
 
 export function MoviesPage() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
   const [inputValue, setInputValue] = useState('');
   const {
     movies,
@@ -16,23 +15,27 @@ export function MoviesPage() {
     currentPage,
     totalPages,
     totalResults,
+    searchQuery,
     searchMovies,
     clearSearch,
     goToPage,
     refresh,
   } = useMovies();
 
+  // URLから検索クエリが変わった時に入力フィールドを同期
+  useEffect(() => {
+    setInputValue(searchQuery);
+  }, [searchQuery]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputValue.trim()) {
-      setSearchQuery(inputValue.trim());
       searchMovies(inputValue.trim());
     }
   };
 
   const handleClearSearch = () => {
     setInputValue('');
-    setSearchQuery('');
     clearSearch();
   };
 
