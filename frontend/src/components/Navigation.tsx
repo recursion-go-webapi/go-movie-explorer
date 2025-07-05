@@ -7,6 +7,7 @@ export function Navigation() {
   const navItems = [
     { href: '/', label: '🏠 ホーム' },
     { href: '/movies', label: '🎦 映画一覧' },
+    { href: '/genre', label: '🏷️ ジャンルから選ぶ' },
     { href: '/search', label: '🔍 検索' },
   ];
 

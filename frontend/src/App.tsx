@@ -13,6 +13,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="movies" element={<MoviesPage />} />
+          <Route path="genre" element={<GenrePage />} />
           <Route path="search" element={<SearchPage />} />
           <Route path="movie/:id" element={<MovieDetailPage />} />
           <Route path="genre/:id" element={<GenrePage />} />
