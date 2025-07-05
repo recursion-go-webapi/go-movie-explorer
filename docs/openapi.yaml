@@ -9,7 +9,7 @@ servers:
   - url: http://localhost:8080
 
 paths:
-  /api/healthz:
+  /healthz:
     get:
       summary: ヘルスチェック
       responses:
