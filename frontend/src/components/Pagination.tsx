@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 interface PaginationProps {
   currentPage: number;
@@ -39,45 +39,51 @@ export function Pagination({ currentPage, totalPages, onPageChange, loading }: P
   const visiblePages = getVisiblePages();
 
   return (
-    <div className="flex justify-center items-center gap-2 mt-8">
-      <Button
-        variant="outline"
-        size="sm"
+    <div className="flex justify-center items-center gap-3 mt-12 mb-8">
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1 || loading}
+        className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-slate-300 hover:text-amber-400 hover:border-amber-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium"
       >
-        前へ
-      </Button>
+        ← 前へ
+      </motion.button>
 
-      <div className="flex gap-1">
+      <div className="flex gap-2">
         {visiblePages.map((page, index) => (
           page === '...' ? (
-            <span key={index} className="px-2 py-1 text-muted-foreground">
+            <span key={`dots-${index}`} className="px-3 py-2 text-slate-400 font-bold">
               ...
             </span>
           ) : (
-            <Button
-              key={page}
-              variant={currentPage === page ? "default" : "outline"}
-              size="sm"
+            <motion.button
+              key={`page-${page}`}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => onPageChange(page as number)}
               disabled={loading}
-              className="min-w-[40px]"
+              className={`min-w-[44px] h-[44px] rounded-lg font-semibold transition-all duration-300 ${
+                currentPage === page
+                  ? 'bg-amber-500 text-slate-900 shadow-lg shadow-amber-500/30 border-2 border-amber-400'
+                  : 'bg-slate-800 text-slate-300 border-2 border-slate-600 hover:text-amber-400 hover:border-amber-400 hover:bg-slate-700'
+              } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {page}
-            </Button>
+            </motion.button>
           )
         ))}
       </div>
 
-      <Button
-        variant="outline"
-        size="sm"
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages || loading}
+        className="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-slate-300 hover:text-amber-400 hover:border-amber-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-medium"
       >
-        次へ
-      </Button>
+        次へ →
+      </motion.button>
     </div>
   );
 }

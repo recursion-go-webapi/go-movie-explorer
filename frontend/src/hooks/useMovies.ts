@@ -72,7 +72,7 @@ export function useMovies() {
       // URLパラメータがある場合は映画を取得
       fetchMovies(currentPage, searchQuery || undefined);
     }
-  }, [searchParams]);
+  }, [searchParams, currentPage, searchQuery, setSearchParams]);
 
   return {
     movies,
