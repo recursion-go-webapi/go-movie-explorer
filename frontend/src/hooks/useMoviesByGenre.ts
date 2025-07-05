@@ -55,7 +55,7 @@ export function useMoviesByGenre(genreId: number) {
       // URLパラメータがある場合は映画を取得
       fetchMoviesByGenre(genreId, currentPage);
     }
-  }, [genreId, searchParams]);
+  }, [genreId, searchParams, currentPage, setSearchParams]);
 
   const goToPage = (page: number) => {
     const newParams = new URLSearchParams(searchParams);

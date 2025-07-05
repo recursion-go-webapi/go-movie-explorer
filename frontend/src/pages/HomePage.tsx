@@ -9,9 +9,6 @@ export function HomePage() {
         <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
           最新映画から名作まで、あなたの次の映画体験を見つけよう
         </p>
-        <button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-full text-lg font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
-          映画を探す
-        </button>
       </section>
 
       {/* 機能紹介セクション */}

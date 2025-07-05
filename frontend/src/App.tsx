@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { HomePage } from '@/pages/HomePage';
 import { MoviesPage } from '@/pages/MoviesPage';
-import { SearchPage } from '@/pages/SearchPage';
 import { MovieDetailPage } from '@/pages/MovieDetailPage';
 import { GenrePage } from '@/pages/GenrePage';
 
@@ -14,7 +13,6 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="movies" element={<MoviesPage />} />
           <Route path="genre" element={<GenrePage />} />
-          <Route path="search" element={<SearchPage />} />
           <Route path="movie/:id" element={<MovieDetailPage />} />
           <Route path="genre/:id" element={<GenrePage />} />
         </Route>
