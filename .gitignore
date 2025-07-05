@@ -1,0 +1,30 @@
+# Claude Code関連ファイル
+CLAUDE.md
+CODE_REVIEW.md
+
+# ログファイル
+backend/logs/
+*.log
+
+# 環境設定ファイル
+backend/.env
+
+# OS固有ファイル
+.DS_Store
+Thumbs.db
+
+# IDEファイル
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Go関連
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# テスト関連
+coverage.*
