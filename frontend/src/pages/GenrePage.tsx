@@ -11,14 +11,17 @@ export function GenrePage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
+  // デフォルトでid=28を使用（idパラメータがない場合）
+  const genreId = id || '28';
+
   const genreMap = genres.reduce((acc, genre) => {
     acc[genre.id.toString()] = genre;
     return acc;
   }, {} as Record<string, { id: number; name: string }>);
-  const genre = id ? genreMap[id] : null;
+  const genre = genreMap[genreId] || null;
 
   const { movies, loading, error, currentPage, totalPages, goToPage } =
-    useMoviesByGenre(genre ? genre.id : 0);
+    useMoviesByGenre(genre ? genre.id : parseInt(genreId));
   const handleMovieClick = (movie: Movie) => {
     navigate(`/movie/${movie.id}`);
   };
@@ -49,7 +52,7 @@ export function GenrePage() {
           <div className="absolute top-1/2 right-4 transform -translate-y-1/2">
             <select
               className="border border-gray-300 rounded px-4 py-2 text-gray-700"
-              value={id}
+              value={genreId}
               onChange={(e) => navigate(`/genre/${e.target.value}`)}
             >
               {genres.map((g) => (
@@ -68,7 +71,7 @@ export function GenrePage() {
             {genre?.name ? `${genre.name}映画一覧` : "ジャンル別映画一覧"}
           </p>
           <p className="text-sm text-gray-500 mb-4">
-            ジャンル ID: {id || "未指定"}
+            ジャンル ID: {genreId}
           </p>
 
           {error && (
