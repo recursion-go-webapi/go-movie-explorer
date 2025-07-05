@@ -73,11 +73,14 @@ func main() {
 	// - /api/movies/search：映画検索APIエンドポイント
 	mux.HandleFunc("/api/movies/search", middleware.LoggingHandler(handlers.SearchMoviesHandler))
 
+	// - /api/genres : ジャンル一覧取得
+	mux.HandleFunc("/api/genres", middleware.LoggingHandler(handlers.GenresHandler))
+	// mux.HandleFunc("/api/genres/", middleware.LoggingHandler(handlers.GenresHandler))
+
 	// セキュリティミドルウェアを全体に適用
 	securedHandler := middleware.SecurityMiddleware(securityConfig)(mux)
 
 	// - /api/movies/popular : 人気映画ランキング（今後追加予定）
-	// - /api/movies/genre   : ジャンル別映画取得（今後追加予定）
 	//
 	// 新しいエンドポイントを追加する場合は、ここにルーティングを追記してください。
 
