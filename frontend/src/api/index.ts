@@ -1,4 +1,4 @@
-import type { MoviesResponse, MovieDetail, GenreMovieListResponse, APIError } from '@/types/movie';
+import type { MoviesResponse, MovieDetail, GenreMovieListResponse, APIError ,GenreListResponse} from '@/types/movie';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
@@ -50,6 +50,10 @@ export const searchMovies = (query: string, page: number = 1): Promise<MoviesRes
 
 export const getMoviesByGenre = (genreId: number, page: number = 1): Promise<GenreMovieListResponse> => {
   return request<GenreMovieListResponse>(`/api/movies/genre?genre_id=${genreId}&page=${page}`);
+};
+
+export const getGenres = (): Promise<{ genres: { id: number; name: string }[] }> => {
+  return request<GenreListResponse>('/api/genres');
 };
 
 export const healthCheck = (): Promise<{ status: string }> => {

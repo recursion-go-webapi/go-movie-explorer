@@ -26,6 +26,10 @@ export interface Genre {
   name: string;
 }
 
+export interface GenreListResponse {
+  genres: Genre[];
+}
+
 export interface MoviesResponse {
   page: number;
   total_pages: number;

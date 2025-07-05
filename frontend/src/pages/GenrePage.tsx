@@ -1,50 +1,101 @@
-import { useParams } from 'react-router-dom';
-
-const genres: Record<string, { name: string; description: string }> = {
-  '28': { name: 'アクション', description: 'スリル満点のアクション映画' },
-  '35': { name: 'コメディ', description: '笑いあふれるコメディ映画' },
-  '18': { name: 'ドラマ', description: '心に響くドラマ映画' },
-  '27': { name: 'ホラー', description: '恐怖と緊張のホラー映画' },
-  '10749': { name: 'ロマンス', description: '愛と感動のロマンス映画' },
-  '878': { name: 'SF', description: '未来とテクノロジーのSF映画' }
-};
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useMoviesByGenre } from "@/hooks/useMoviesByGenre";
+import { useGenres } from "@/hooks/useGenres";
+import { MovieGrid } from "@/components/MovieGrid";
+import { Pagination } from "@/components/Pagination";
+import type { Movie } from "@/types/movie";
 
 export function GenrePage() {
+  const { genres, loading: genresLoading, error: genresError } = useGenres();
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const genre = id ? genres[id] : null;
+
+  const genreMap = genres.reduce((acc, genre) => {
+    acc[genre.id.toString()] = genre;
+    return acc;
+  }, {} as Record<string, { id: number; name: string }>);
+  const genre = id ? genreMap[id] : null;
+
+  const { movies, loading, error, currentPage, totalPages, goToPage } =
+    useMoviesByGenre(genre ? genre.id : 0);
+  const handleMovieClick = (movie: Movie) => {
+    navigate(`/movie/${movie.id}`);
+  };
+
+  if (genresLoading) {
+    return (
+      <p className="text-center text-indigo-600 font-semibold mt-8">
+        ジャンルを読み込み中...
+      </p>
+    );
+  }
+
+  if (genresError) {
+    return (
+      <p className="text-center text-red-500 font-semibold mt-8">
+        ジャンルの取得中にエラーが発生しました: {genresError}
+      </p>
+    );
+  }
 
   return (
     <div className="min-h-screen py-8">
-      <div className="bg-white/95 backdrop-blur-md rounded-xl p-8 shadow-lg text-center mb-8">
-        <h1 className="text-3xl font-bold text-indigo-600 mb-4">
-          🏷️ {genre?.name || 'ジャンル別映画'}
+      <div className="bg-white/95 backdrop-blur-md rounded-xl p-8 shadow-lg mb-8 relative">
+        <h1 className="text-3xl font-bold text-indigo-600 text-center">
+          🏷️ {genre?.name || "ジャンル別映画"}
         </h1>
-        <p className="text-gray-600">
-          {genre?.description || '選択されたジャンルの映画一覧'}
-        </p>
+        {genres.length > 0 && (
+          <div className="absolute top-1/2 right-4 transform -translate-y-1/2">
+            <select
+              className="border border-gray-300 rounded px-4 py-2 text-gray-700"
+              value={id}
+              onChange={(e) => navigate(`/genre/${e.target.value}`)}
+            >
+              {genres.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
-      
+
       <div className="bg-white/95 backdrop-blur-md rounded-xl p-8 shadow-lg">
         <div className="text-center text-gray-600">
-          <p className="text-lg mb-4">準備中...</p>
-          <p>ジャンル ID: {id || '未指定'}</p>
-          <p className="mt-2">ジャンル別映画一覧表示機能を実装予定です</p>
+          <p className="text-lg mb-2 font-semibold">
+            {genre?.name ? `${genre.name}映画一覧` : "ジャンル別映画一覧"}
+          </p>
+          <p className="text-sm text-gray-500 mb-4">
+            ジャンル ID: {id || "未指定"}
+          </p>
+
+          {error && (
+            <p className="text-red-500 font-semibold mb-4">
+              エラーが発生しました: {error}
+            </p>
+          )}
+          {loading && movies.length === 0 ? (
+            <p className="text-indigo-600 font-semibold">読み込み中...</p>
+          ) : (
+            <MovieGrid
+              movies={movies}
+              loading={loading}
+              onMovieClick={handleMovieClick}
+            />
+          )}
         </div>
       </div>
-      
+
       {/* ページネーション */}
       <div className="flex justify-center mt-8">
-        <div className="flex gap-2">
-          <button className="px-4 py-2 border-2 border-indigo-600 text-indigo-600 rounded hover:bg-indigo-600 hover:text-white transition-colors">
-            ‹ 前
-          </button>
-          <button className="px-4 py-2 bg-indigo-600 text-white rounded">
-            1
-          </button>
-          <button className="px-4 py-2 border-2 border-indigo-600 text-indigo-600 rounded hover:bg-indigo-600 hover:text-white transition-colors">
-            次 ›
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={goToPage}
+          loading={loading}
+        />
       </div>
     </div>
   );
