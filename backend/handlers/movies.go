@@ -38,10 +38,10 @@ func MoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-// 映画詳細取得ハンドラー /api/movies/{id}
+// 映画詳細取得ハンドラー /api/movie/{id}
 func MovieDetailHandler(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "application/json")
-	prefix := "/api/movies/"
+	prefix := "/api/movie/"
 	if !strings.HasPrefix(r.URL.Path, prefix) {
 		return middleware.NewBadRequestError(fmt.Sprintf("無効なパス: %s", r.URL.Path))
 	}

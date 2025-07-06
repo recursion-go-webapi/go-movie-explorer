@@ -62,23 +62,23 @@ func main() {
 	// ヘルスチェックエンドポイント
 	mux.HandleFunc("/healthz", handlers.HealthHandler)
 
+	// - /api/movies/search：映画検索APIエンドポイント
+	mux.HandleFunc("/api/movies/search", middleware.LoggingHandler(handlers.SearchMoviesHandler))
+
+	// 映画ジャンル別取得
+	mux.HandleFunc("/api/movies/genre", middleware.LoggingHandler(handlers.ListMoviesByGenreHandler))
+
+	// - /api/movies/popular : 人気映画ランキング
+	mux.HandleFunc("/api/movies/popular", middleware.LoggingHandler(handlers.PopularMoviesHandler))
+
+	// - /api/movie/{id} : 映画詳細取得APIエンドポイント
+	mux.HandleFunc("/api/movie/", middleware.LoggingHandler(handlers.MovieDetailHandler))
+
 	// 映画一覧取得
 	mux.HandleFunc("/api/movies", middleware.LoggingHandler(handlers.MoviesHandler))
 
 	// - /api/genres : ジャンル一覧取得
 	mux.HandleFunc("/api/genres", middleware.LoggingHandler(handlers.GenresHandler))
-
-	// 映画ジャンル別取得
-	mux.HandleFunc("/api/movies/genre", middleware.LoggingHandler(handlers.ListMoviesByGenreHandler))
-
-	// - /api/movies/{id} : 映画詳細取得APIエンドポイント
-	mux.HandleFunc("/api/movies/", middleware.LoggingHandler(handlers.MovieDetailHandler))
-
-	// - /api/movies/search：映画検索APIエンドポイント
-	mux.HandleFunc("/api/movies/search", middleware.LoggingHandler(handlers.SearchMoviesHandler))
-
-	// - /api/movies/popular : 人気映画ランキング（今後追加予定）
-	mux.HandleFunc("/api/movies/popular", middleware.LoggingHandler(handlers.PopularMoviesHandler))
 
 	log.Printf("Server starting on http://localhost%s\n", port)
 	log.Printf("Server listening on port %s", port)
