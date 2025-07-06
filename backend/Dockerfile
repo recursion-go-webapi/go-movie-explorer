@@ -35,8 +35,6 @@ RUN mkdir -p logs
 # ポート8080を公開
 EXPOSE 8080
 
-# 本番環境用の環境変数を設定
-ENV GO_ENV=production
 
 # アプリケーションを実行
 CMD ["./main"]
