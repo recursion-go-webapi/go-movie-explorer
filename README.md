@@ -259,12 +259,12 @@ Failed to fetch
 
 ### 👥 チームメンバー
 
-| Name            | GitHub                                                | Role      | 担当エンドポイント |
-| --------------- | ----------------------------------------------------- | --------- | ------------------ |
-| Takeshi | [Takeshi ](https://github.com/takeshi-arihori) | Developer | TBD                |
-| Hiroki | [Hiroki](https://github.com/hiroki-jandararin) | Developer | TBD                |
-| Masato | [Masato](https://github.com/iwmstjp) | Developer | TBD                |
-| Tomohiko |  [Tomohiko](https://github.com/2017cjx) | Developer | TBD                |
+| Name            | GitHub                                                | 
+| --------------- | ----------------------------------------------------- | 
+| Takeshi | [Takeshi ](https://github.com/takeshi-arihori) | 
+| Hiroki | [Hiroki](https://github.com/hiroki-jandararin) | 
+| Masato | [Masato](https://github.com/iwmstjp) |
+| Tomohiko |  [Tomohiko](https://github.com/2017cjx) |
 
 ### 開発参加方法
 1. このリポジトリをフォーク
