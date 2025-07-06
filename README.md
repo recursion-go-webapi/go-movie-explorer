@@ -106,6 +106,12 @@ npm run dev
 ```
 ✅ フロントエンド: http://localhost:3003
 
+#### API Docs起動
+```bash
+# rootで実行
+docker run -p 8081:8080 -e SWAGGER_JSON=/docs/openapi.yaml -v $(pwd)/docs:/docs swaggerapi/swagger-ui
+```
+
 ### 方法2: Docker Compose（自動起動）
 
 Docker Composeを使用した詳細な起動方法は [README.docker.md](./README.docker.md) を参照してください。
