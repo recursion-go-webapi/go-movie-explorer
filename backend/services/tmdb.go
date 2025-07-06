@@ -228,8 +228,8 @@ func SearchMoviesFromTMDB(query string, page int) (*models.MoviesResponse, error
 // }
 
 func GetPopularMoviesFromTMDB(page int) (*models.MoviesResponse, error) {
-	apiKey := os.Getenv("TMDB_API_KEY")
-	if apiKey == "" {
+	apiToken := os.Getenv("TMDB_API_KEY") // 今はトークンをここに入れるとする
+	if apiToken == "" {
 		return nil, fmt.Errorf("TMDB_API_KEYが設定されていません")
 	}
 
@@ -240,7 +240,9 @@ func GetPopularMoviesFromTMDB(page int) (*models.MoviesResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("リクエスト作成失敗: %w", err)
 	}
+
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+apiToken)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -252,12 +254,11 @@ func GetPopularMoviesFromTMDB(page int) (*models.MoviesResponse, error) {
 		return nil, fmt.Errorf("TMDB APIエラー: status=%d", resp.StatusCode)
 	}
 
-	var tmdbResp models.MoviesResponse // TmdbDiscoverResponse → MoviesResponse に変更
+	var tmdbResp models.MoviesResponse
 	if err := json.NewDecoder(resp.Body).Decode(&tmdbResp); err != nil {
 		return nil, fmt.Errorf("レスポンスデコード失敗: %w", err)
 	}
 
-	// そのまま tmdbResp を返せばOK
 	return &tmdbResp, nil
 }
 

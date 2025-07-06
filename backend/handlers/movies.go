@@ -127,7 +127,7 @@ func SearchMoviesHandler(w http.ResponseWriter, r *http.Request) error {
 }
 
 // - /api/movies/popular : 人気映画ランキング（今後追加予定）
-func PopularMoviesHandler(w http.ResponseWriter, r *http.Request) {
+func PopularMoviesHandler(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "application/json")
 
 	// クエリパラメータ取得
@@ -140,14 +140,15 @@ func PopularMoviesHandler(w http.ResponseWriter, r *http.Request) {
 	// サービス呼び出し
 	resp, err := services.GetPopularMoviesFromTMDB(page)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return middleware.NewInternalServerError(fmt.Sprintf("TMDB API 呼び出し失敗: %v", err))
 	}
 
 	// レスポンス返却
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		return middleware.NewInternalServerError(fmt.Sprintf("JSON エンコード失敗: %v", err))
 	}
+
+	return nil
 }
 
 // - /api/movies/genre   : ジャンル別映画取得（今後追加予定）
