@@ -34,6 +34,7 @@ paths:
                       TMDB: "OK"
         '500':
           description: サーバーに問題が発生
+
   /api/movies:
     get:
       summary: 映画一覧を取得
@@ -74,6 +75,7 @@ paths:
                     popularity: 405.8029
         '400':
           description: 不正なリクエスト
+
   /api/movies/genre:
     get:
       summary: 映画ジャンルの一覧を取得
@@ -113,6 +115,7 @@ paths:
                     vote_average: 7.2
                     popularity: 617.5712
                     vote_count: 517
+
   /api/movies/{id}:
     get:
       summary: 特定の映画情報を取得
@@ -180,58 +183,68 @@ paths:
                 $ref: '#/components/schemas/MovieListWithoutGenreResponse'
         '400':
           description: パラメータ不正（例 キーワード未指定など）
-  # /movies/popular:
-  #   get:
-  #     summary: 人気映画ランキングの取得
-  #     description: TMDBの人気映画ランキング（「/movie/popular」）を取得するエンドポイント。
-  #     parameters:
-  #       - name: page
-  #         in: query
-  #         description: 取得するページ番号（省略時は1）
-  #         required: false
-  #         schema:
-  #           type: integer
-  #           minimum: 1
-  #           default: 1
-  #     responses:
-  #       '200':
-  #         description: 人気映画リストの取得に成功
-  #         content:
-  #           application/json:
-  #             schema:
-  #               type: object
-  #               properties:
-  #                 page:
-  #                   type: integer
-  #                 total_results:
-  #                   type: integer
-  #                 total_pages:
-  #                   type: integer
-  #                 results:
-  #                   type: array
-  #                   items:
-  #                     type: object
-  #                     properties:
-  #                       id:
-  #                         type: integer
-  #                       title:
-  #                         type: string
-  #                       overview:
-  #                         type: string
-  #                       poster_path:
-  #                         type: string
-  #                         nullable: true
-  #                       release_date:
-  #                         type: string
-  #                         format: date
-  #                       vote_average:
-  #                         type: number
-  #                         format: float
-  #                       vote_count:
-  #                         type: integer
-  #       '400':
-  #         description: クライアントからのリクエストが不正
-  
+
+  /api/movies/popular:
+    get:
+      summary: 人気映画ランキングの取得
+      description: TMDBの人気映画ランキングを取得するエンドポイント。
+      parameters:
+        - name: page
+          in: query
+          description: 取得するページ番号（省略時は1）
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+      responses:
+        '200':
+          description: 人気映画リストの取得に成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                    example: 1
+                  total_results:
+                    type: integer
+                    example: 1000
+                  total_pages:
+                    type: integer
+                    example: 50
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Movie'
+        '400':
+          description: クライアントからのリクエストが不正
+
+  /api/genres:
+    get:
+      summary: 映画ジャンルの一覧を取得
+      description: TMDBのジャンルAPIを利用し、映画ジャンルの一覧を取得する
+      responses:
+        '200':
+          description: ジャンル一覧の取得に成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  genres:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Genre'
+              example:
+                genres:
+                  - id: 28
+                    name: Action
+                  - id: 12
+                    name: Adventure
+                  - id: 16
+                    name: Animation
 
 components:
   schemas:
