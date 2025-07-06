@@ -13,9 +13,9 @@ import (
 )
 
 func main() {
-	// .env読み込み
+	// .env読み込み（ファイルが存在しない場合は無視）
 	if err := godotenv.Load(".env"); err != nil {
-		log.Fatalf(".envファイルを設定してください: %v", err)
+		log.Printf(".envファイルが見つかりません（環境変数が設定されていれば正常動作します）: %v", err)
 	}
 
 	// logsディレクトリ自動作成
