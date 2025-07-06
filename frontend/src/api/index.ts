@@ -39,6 +39,10 @@ export const getMovies = (page: number = 1): Promise<MoviesResponse> => {
   return request<MoviesResponse>(`/api/movies?page=${page}`);
 };
 
+export const getPopularMovies = (page: number = 1): Promise<MoviesResponse> => {
+  return request<MoviesResponse>(`/api/movies/popular?page=${page}`);
+};
+
 export const getMovieDetail = (id: number): Promise<MovieDetail> => {
   return request<MovieDetail>(`/api/movie/${id}`);
 };
