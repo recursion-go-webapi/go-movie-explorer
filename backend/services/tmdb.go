@@ -17,8 +17,10 @@ const BaseURL = "https://api.themoviedb.org/3"
 
 // シングルトンHTTPクライアント
 var (
-	httpClient *http.Client
-	clientOnce sync.Once
+	httpClient     *http.Client
+	clientOnce     sync.Once
+	tmdbAPIVersion string
+	versionMutex   sync.RWMutex
 )
 
 // getHTTPClient はシングルトンパターンでHTTPクライアントを取得
@@ -55,6 +57,23 @@ func GetTMDBApiKey() string {
 	return os.Getenv("TMDB_API_KEY")
 }
 
+// GetTMDBAPIVersion はTMDB APIのバージョン情報を取得
+func GetTMDBAPIVersion() string {
+	versionMutex.RLock()
+	defer versionMutex.RUnlock()
+	if tmdbAPIVersion == "" {
+		return "default" // デフォルト値
+	}
+	return tmdbAPIVersion
+}
+
+// setTMDBAPIVersion はTMDB APIのバージョン情報を設定
+func setTMDBAPIVersion(version string) {
+	versionMutex.Lock()
+	defer versionMutex.Unlock()
+	tmdbAPIVersion = version
+}
+
 // --- TMDB疎通確認用Pinger（/healthz用）---
 type TmdbPinger struct{}
 
@@ -65,24 +84,47 @@ func (t *TmdbPinger) Ping(ctx context.Context) error {
 	if apiKey == "" {
 		return fmt.Errorf("TMDB_API_KEYが設定されていません")
 	}
-	url := fmt.Sprintf("%s/discover/movie?page=1&api_key=%s", BaseURL, apiKey)
-	// url := BaseURL + "/discover/movie?page=1"
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+
+	// 軽量なconfigurationエンドポイントを使用
+	req, err := http.NewRequestWithContext(ctx, "GET", BaseURL+"/configuration", nil)
 	if err != nil {
-		return fmt.Errorf("TMDB Pingリクエスト作成失敗: %w", err)
+		return err
 	}
-	// req.Header.Set("Authorization", "Bearer "+apiKey)
-	req.Header.Set("Accept", "application/json")
-	client := getPingHTTPClient()
-	resp, err := client.Do(req)
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+
+	resp, err := getPingHTTPClient().Do(req)
 	if err != nil {
-		return fmt.Errorf("TMDB Pingリクエスト失敗: %w", err)
+		return err
 	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("TMDB Ping status not OK: %d", resp.StatusCode)
+		return fmt.Errorf("TMDB APIが利用できません (ステータス: %d)", resp.StatusCode)
 	}
+
+	// TMDB APIバージョン情報を取得・保存
+	extractTMDBVersion(resp)
+
 	return nil
+}
+
+// extractTMDBVersion はレスポンスからTMDB APIのバージョン情報を抽出
+func extractTMDBVersion(resp *http.Response) {
+	// 1. レスポンスヘッダーからバージョン情報を取得
+	if apiVersion := resp.Header.Get("X-API-Version"); apiVersion != "" {
+		setTMDBAPIVersion(apiVersion)
+		return
+	}
+
+	// 2. TMDBのAPI URLからバージョンを推定 (v3)
+	if version := resp.Header.Get("X-RateLimit-Limit"); version != "" {
+		// API v3 の特徴的なヘッダーが存在する場合
+		setTMDBAPIVersion("v3")
+		return
+	}
+
+	// 3. デフォルトとしてURLベースのバージョンを設定
+	setTMDBAPIVersion("v3")
 }
 
 // --- 映画一覧取得（/discover/movie）---
@@ -228,21 +270,22 @@ func SearchMoviesFromTMDB(query string, page int) (*models.MoviesResponse, error
 // }
 
 func GetPopularMoviesFromTMDB(page int) (*models.MoviesResponse, error) {
-	apiToken := os.Getenv("TMDB_API_KEY") // 今はトークンをここに入れるとする
-	if apiToken == "" {
+	apiKey := GetTMDBApiKey()
+	if apiKey == "" {
 		return nil, fmt.Errorf("TMDB_API_KEYが設定されていません")
 	}
 
 	url := fmt.Sprintf("%s/movie/popular?page=%d", BaseURL, page)
 
-	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("リクエスト作成失敗: %w", err)
 	}
 
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiToken)
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+
+	client := getHTTPClient()
 
 	resp, err := client.Do(req)
 	if err != nil {

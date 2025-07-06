@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"go-movie-explorer/middleware"
@@ -37,9 +38,6 @@ func MoviesHandler(w http.ResponseWriter, r *http.Request) error {
 		return middleware.NewInternalServerError(fmt.Sprintf("件数制限の検証中にエラーが発生しました: %v", err))
 	}
 	
-	// 現在はlimitは使用していないが、将来的に使用する予定
-	_ = limit
-
 	// 現在はlimitは使用していないが、将来的に使用する予定
 	_ = limit
 
