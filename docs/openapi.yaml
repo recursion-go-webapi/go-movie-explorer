@@ -116,7 +116,7 @@ paths:
                     popularity: 617.5712
                     vote_count: 517
 
-  /api/movies/{id}:
+  /api/movie/{id}:
     get:
       summary: 特定の映画情報を取得
       parameters:

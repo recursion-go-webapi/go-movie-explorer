@@ -1,251 +1,272 @@
-# Go Web API Team Project
+# Go Movie Explorer
 
-映画データベース(TMDB)を活用したGo WebAPIプロジェクト
+映画データベース(TMDB)を活用したGoバックエンド + Reactフロントエンドアプリケーション
 
-## 📋 プロジェクト概要
+![アプリケーション画像](画像ファイルパス)
 
-**開発期間**: 2025/06/21 〜 2025/07/06 (2週間)  
+## 📖 概要
 
-## ✅ 決定事項
+Go Movie Explorerは、The Movie Database (TMDB) APIを利用した映画情報検索・閲覧アプリケーションです。
+
+### 主な機能
+- 🎬 **映画一覧表示** - 人気映画の一覧表示
+- 🔍 **映画検索** - タイトルで映画を検索
+- 📝 **映画詳細** - 映画の詳細情報表示
+- 🎭 **ジャンル別表示** - ジャンル別の映画一覧
+- ⭐ **人気映画ランキング** - 人気映画のランキング表示
 
 ### 技術スタック
-- **バックエンド**: Go言語 + net/http標準ライブラリ
-- **フロントエンド**: React + TypeScript + Vite + Tailwind CSS 4.0 + shadcn/ui
+- **バックエンド**: Go + net/http標準ライブラリ
+- **フロントエンド**: React + TypeScript + Vite + Tailwind CSS + shadcn/ui
+- **API**: The Movie Database (TMDB) API
+- **開発環境**: Docker Compose
 
-### プロジェクトテーマ
-**映画API (TMDB連携)**
-- [The Movie Database (TMDB) API](https://developer.themoviedb.org/docs/getting-started) を使用
-- 映画情報の検索・取得・管理機能を実装
-- [API Reference & Live Testing](https://developer.themoviedb.org/reference/account-details)
+---
 
-### エンドポイント設計
-- 映画一覧取得API (リスト表示)
-- 映画詳細取得API (詳細表示)
-- 映画検索API (検索)
-- 人気映画ランキングAPI (データの集計)
-- ジャンル一覧取得API (ジャンル一覧)
-- ジャンル別映画取得API (ジャンル別)
+## 🚀 クイックスタート
 
-### データ構造
-- TMDB APIと連携した映画情報データ
-- JSON形式でのレスポンス
-- Go構造体での型安全なデータ管理
+### 必要環境
+- **Go**: 1.19以上
+- **Node.js**: 18以上
+- **TMDB API Key**: [TMDB公式サイト](https://www.themoviedb.org/settings/api)から取得
 
-
-### レビュー体制
-| プッシュする人 | レビュワー |
-| -------------- | ---------- |
-| Masato         | Hiroki     |
-| Hiroki         | Takeshi    |
-| Takeshi        | Masato     |
-
-### スケジュール
-- **〜6/25**: Go言語学習期間 ✅
-- **6/25**: プロジェクトテーマ決定・役割分担MTG ✅
-- **6/26〜7/6**: 開発期間（実質10日間）
-
-#### 開発スケジュール詳細
-**第1週（6/26〜6/29）: エンドポイント実装週**
-- 目標：全エンドポイントの基本実装完了
-- 各メンバーが担当エンドポイントを実装
-- 基本的なJSON レスポンスが返却される状態
-
-**第2週（6/30〜7/6）: 統合・仕上げ週**
-- 目標：各タスクの完成・統合テスト
-- フロントエンド（デモアプリ）実装
-- APIドキュメント作成・整備
-- 全体統合テスト・バグ修正
-
-
-### 開発方針
-- **API実装**: 1人1エンドポイント以上担当
-- **コードレビュー**: プルリクエストでお互いの実装を学び合う
-- **詳細なGitHub運用ルールは[README.github.md](./README.github.md)を参照**
-
-## 🛠️ 開発環境セットアップ
-
-### 必要なツール
-- Go (1.19以上)
-- Node.js (18以上)
-- npm
-- Git
-
-### セットアップ手順
-
-#### 1. リポジトリのクローン
+### 1. リポジトリのクローン
 ```bash
-git clone [このリポジトリのURL]
+git clone https://github.com/recursion-go-webapi/go-movie-explorer.git
 cd go-movie-explorer
 ```
 
-#### 2. バックエンドセットアップ
+### 2. TMDB API Keyの設定
+
+#### バックエンド用
 ```bash
 cd backend
+cp .env.example .env
+```
 
-# Goのバージョン確認
-go version
+`.env`ファイルを編集してAPIキーを設定：
+```bash
+PORT=8080
+TMDB_API_KEY=your_tmdb_api_key_here
+GO_ENV=development
+FRONTEND_URL=http://localhost:3003
+```
+
+#### フロントエンド用
+```bash
+cd frontend
+cp .env.example .env # .envを作成
+```
+
+`.env`ファイルを編集：
+```bash
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+---
+
+## 💻 ローカル開発環境での起動
+
+### 方法1: 手動起動
+
+#### バックエンド起動
+```bash
+cd backend
 
 # 依存関係のインストール
 go mod tidy
 
-# .envファイルの作成とAPIキー設定
-cp .env.example .env
-# .envをエディタで開き、TMDB_API_KEYを設定
-
-# サーバーの起動
+# サーバー起動
 go run main.go
-# http://localhost:8080 で起動
-
-# ヘルスチェック
-curl http://localhost:8080/healthz
 ```
+✅ バックエンド: http://localhost:8080
 
-#### 3. フロントエンドセットアップ
+#### フロントエンド起動
 ```bash
 cd frontend
 
 # 依存関係のインストール
 npm install
 
-# 環境変数の設定
-cp .env.example .env
-
 # 開発サーバー起動
 npm run dev
-# http://localhost:3003 で起動
 ```
+✅ フロントエンド: http://localhost:3003
 
-### 🚀 起動方法
+### 方法2: Docker Compose（自動起動）
 
-**バックエンド起動:**
+Docker Composeを使用した詳細な起動方法は [README.docker.md](./README.docker.md) を参照してください。
+
 ```bash
-cd backend && go run main.go
+# 一括起動
+docker compose up -d
+
+# 起動確認
+docker compose ps
 ```
 
-**フロントエンド起動:**
+起動後のアクセス先：
+- **フロントエンド**: http://localhost:3003
+- **バックエンドAPI**: http://localhost:8080
+- **Swagger UI**: http://localhost:8081
+
+---
+
+## 🔗 APIエンドポイント
+
+| メソッド | エンドポイント | 説明 |
+|---------|---------------|------|
+| GET | `/healthz` | ヘルスチェック |
+| GET | `/api/movies` | 映画一覧取得 |
+| GET | `/api/movie/{id}` | 映画詳細取得 |
+| GET | `/api/movies/search` | 映画検索 |
+| GET | `/api/movies/popular` | 人気映画ランキング |
+| GET | `/api/genres` | ジャンル一覧取得 |
+| GET | `/api/movies/genre` | ジャンル別映画取得 |
+
+### API仕様書
+- **Swagger UI**: http://localhost:8081 (Docker起動時)
+- **OpenAPI仕様**: [docs/openapi.yaml](./docs/openapi.yaml)
+
+---
+
+## 🧪 動作確認
+
+### バックエンドAPI
 ```bash
-cd frontend && npm run dev
+# ヘルスチェック
+curl http://localhost:8080/healthz
+
+# 映画一覧取得
+curl http://localhost:8080/api/movies
+
+# 映画詳細取得（例：Fight Club）
+curl http://localhost:8080/api/movie/550
+
+# 映画検索
+curl "http://localhost:8080/api/movies/search?query=batman"
+
+# ジャンル一覧取得
+curl http://localhost:8080/api/genres
+
+# ジャンル別映画取得（例：Actionジャンル）
+curl "http://localhost:8080/api/movies/genre?genre_id=28"
+
+# 人気映画ランキング
+curl http://localhost:8080/api/movies/popular
+
 ```
 
-- バックエンド: http://localhost:8080
-- フロントエンド: http://localhost:3003
+### フロントエンド
+ブラウザで http://localhost:3003 にアクセスして以下を確認：
+- ホームページの表示
+- 映画一覧の表示
+- 検索機能
+- 映画詳細ページ
+- 映画カテゴリ一覧
+---
 
-
-## 🗂️ ディレクトリ構造
+## 🗂️ プロジェクト構成
 
 ```
-.
-├── README.md            # プロジェクトの概要・使い方・開発ルール
-├── devlog/              # 開発ログ・日々の作業記録・MTG記録
-│   ├── mtg/            # MTG記録
-├── backend/             # Go言語のWeb APIサーバー
-│   ├── main.go          # アプリケーションのエントリーポイント・HTTPサーバー起動
-│   ├── handlers/        # 各APIエンドポイントのハンドラー群
-│   │   ├── movies.go    # 映画関連APIハンドラー
-│   │   └── movies_test.go # 映画ハンドラーのテスト
-│   ├── middleware/      # ミドルウェア（ログ・セキュリティ・エラーハンドリング）
-│   │   ├── error.go     # エラーハンドリングミドルウェア
-│   │   ├── logging.go   # ログミドルウェア
-│   │   └── security.go  # セキュリティミドルウェア（CORS・ヘッダー設定）
-│   ├── models/          # データ構造体定義
-│   │   ├── movies.go    # 映画レスポンス構造体
-│   │   └── movies_test.go # 映画モデルのテスト
-│   ├── services/        # TMDB APIクライアント等のサービス層
-│   │   ├── tmdb.go      # TMDB API呼び出しロジック
-│   │   └── tmdb_test.go # TMDB サービスのテスト
-│   ├── logs/            # ログファイル出力用ディレクトリ
-│   │   └── server.log   # サーバーログファイル
-│   ├── .env.example     # 環境変数テンプレート
-│   ├── go.mod           # Go言語の依存関係管理ファイル
-│   ├── go.sum           # 依存関係の検証用ファイル
-│   ├── coverage.html    # テストカバレッジレポート（HTML）
-│   ├── coverage.out     # テストカバレッジデータ
-│   ├── CLAUDE.md        # 開発時のメモ・設定情報
-│   └── CODE_REVIEW.md   # コードレビューガイドライン
-├── frontend/            # React フロントエンドアプリケーション
-│   ├── src/             # ソースコード
-│   │   ├── api/         # APIクライアント
-│   │   ├── components/  # Reactコンポーネント
-│   │   │   ├── Layout.tsx      # 共通レイアウト
-│   │   │   ├── Navigation.tsx  # ナビゲーションバー
-│   │   │   └── ui/            # shadcn/uiコンポーネント
-│   │   ├── pages/       # ページコンポーネント
-│   │   │   ├── HomePage.tsx        # ホームページ
-│   │   │   ├── MoviesPage.tsx      # 映画一覧ページ
-│   │   │   ├── SearchPage.tsx      # 検索ページ
-│   │   │   ├── MovieDetailPage.tsx # 映画詳細ページ
-│   │   │   └── GenrePage.tsx       # ジャンル別ページ
-│   │   ├── hooks/      # カスタムフック
-│   │   ├── lib/        # ユーティリティ関数
-│   │   └── types/      # TypeScript型定義
-│   ├── public/         # 静的ファイル
-│   ├── package.json    # npm依存関係
-│   ├── vite.config.ts  # Vite設定
-│   ├── components.json # shadcn/ui設定
-│   ├── eslint.config.js # ESLint設定
-│   ├── tsconfig*.json  # TypeScript設定
-│   ├── .env.example    # 環境変数テンプレート
-│   ├── .gitignore      # Git除外設定
-│   └── README.md       # フロントエンド用README
-└── docs/                # APIドキュメント
-    └── api-spec.md      # API仕様書・エンドポイント詳細（Markdown形式）
+go-movie-explorer/
+├── README.md                 # このファイル（ローカル起動方法）
+├── README.docker.md          # Docker関連の操作方法
+├── README.github.md          # GitHub運用ルール
+├── compose.yml               # Docker Compose設定
+├── backend/                  # Goバックエンド
+│   ├── main.go              # メインエントリーポイント
+│   ├── handlers/            # APIハンドラー
+│   ├── middleware/          # ミドルウェア
+│   ├── models/              # データモデル
+│   ├── services/            # TMDB APIクライアント
+│   └── .env.example         # 環境変数テンプレート
+├── frontend/                # Reactフロントエンド
+│   ├── src/                 # ソースコード
+│   │   ├── pages/           # ページコンポーネント
+│   │   ├── components/      # UIコンポーネント
+│   │   ├── hooks/           # カスタムフック
+│   │   └── api/             # APIクライアント
+│   └── .env.example         # 環境変数テンプレート
+└── docs/                    # API仕様書
+    └── openapi.yaml         # OpenAPI仕様
 ```
 
-### 📂 各ディレクトリの役割
+---
 
-#### `backend/`
-- **Go言語によるWeb APIサーバー**
-- HTTPリクエストを受け取りJSONレスポンスを返す
-- ポート8080で起動（例：http://localhost:8080）
+## 🛠️ 開発・運用
 
-#### `frontend/`
-- **React + TypeScript マルチページアプリケーション**
-- React Router を使用したSPA（Single Page Application）
-- 映画検索・一覧表示・詳細表示機能
-- モダンなUIライブラリ（Tailwind CSS + shadcn/ui）
-- ポート3003で起動（http://localhost:3003）
+### 開発フロー
+詳細なGitHub運用ルール・ブランチ戦略は [README.github.md](./README.github.md) を参照してください。
 
-**ページ構成:**
-- ホームページ (`/`) - 人気映画ランキング・アプリ紹介
-- 映画一覧ページ (`/movies`) - 映画一覧・検索・フィルター機能
-- 検索ページ (`/search`) - リアルタイム検索機能
-- 映画詳細ページ (`/movie/:id`) - 映画詳細情報・関連映画
-- ジャンル別ページ (`/genre/:id`) - ジャンル別映画一覧
+### Docker運用
+Docker Composeを使用したデプロイ・本番運用については [README.docker.md](./README.docker.md) を参照してください。
 
-#### `docs/`
-- **APIドキュメント（Markdown形式）**
-- エンドポイント仕様・リクエスト/レスポンス例
-- 使用方法・サンプルコード
+### テスト実行
+```bash
+# バックエンドテスト
+cd backend
+go test ./...
 
-#### `devlog/`
-- **開発過程の記録**
-- MTG議事録・技術的な決定事項・振り返り
+# フロントエンドテスト
+cd frontend
+npm test
+```
 
+---
 
-### 📋 成果物の構成
+## 🆘 トラブルシューティング
 
-1. **Web API** (`backend/`) - Go言語製RESTful API
-2. **マルチページWebアプリケーション** (`frontend/`) - React製SPA
-3. **APIドキュメント** (`docs/`) - Markdown形式の仕様書
+### よくある問題
 
-## 📊 進捗管理
+#### 1. TMDB APIキーエラー
+```
+log.Fatal("TMDB_API_KEYが設定されていません")
+```
+**解決方法**: `.env`ファイルでTMDB_API_KEYが正しく設定されているか確認
 
-### Issues・Pull Requests
-- **Issues**: 機能実装やバグ報告の単位で作成
+#### 2. ポート番号の競合
+```
+bind: address already in use
+```
+**解決方法**: 既に起動中のプロセスを停止するか、別のポートを使用
 
-## 🎯 成果物
+#### 3. フロントエンドでAPIエラー
+```
+Failed to fetch
+```
+**解決方法**: バックエンドが起動しているか確認（http://localhost:8080/healthz）
 
-### 最終的な提出物
-- [x] Go製Web API
-- [x] React製フロントエンドアプリケーション
-- [ ] APIドキュメント（OpenAPI形式）
-- [x] README（使用方法・API仕様）
+#### 4. Docker起動エラー
+**解決方法**: [README.docker.md](./README.docker.md) のトラブルシューティングセクションを参照
 
+---
 
-## 👥 チームメンバー
+## 🤝 コントリビューション
+
+### 👥 チームメンバー
 
 | Name            | GitHub                                                | Role      | 担当エンドポイント |
 | --------------- | ----------------------------------------------------- | --------- | ------------------ |
 | Takeshi | [Takeshi ](https://github.com/takeshi-arihori) | Developer | TBD                |
 | Hiroki | [Hiroki](https://github.com/hiroki-jandararin) | Developer | TBD                |
 | Masato | [Masato](https://github.com/iwmstjp) | Developer | TBD                |
+| Tomohiko |  [Tomohiko](https://github.com/2017cjx) | Developer | TBD                |
+
+### 開発参加方法
+1. このリポジトリをフォーク
+2. フィーチャーブランチを作成
+3. 変更をコミット
+4. プルリクエストを作成
+
+詳細は [README.github.md](./README.github.md) を参照してください。
+
+---
+
+## 🔗 関連リンク
+
+- [TMDB API Documentation](https://developer.themoviedb.org/docs)
+- [Go Documentation](https://golang.org/doc/)
+- [React Documentation](https://react.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/)
