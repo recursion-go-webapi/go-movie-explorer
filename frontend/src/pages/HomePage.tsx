@@ -1,3 +1,5 @@
+import { MoviePopular } from "./MoviePopular";
+
 export function HomePage() {
   return (
     <div className="min-h-screen">
@@ -53,8 +55,7 @@ export function HomePage() {
             🔥 人気映画ランキング
           </h2>
           <div className="text-center text-gray-600">
-            <p className="text-lg">準備中...</p>
-            <p className="mt-2">人気映画ランキングを実装予定です</p>
+            <MoviePopular />
           </div>
         </div>
       </section>

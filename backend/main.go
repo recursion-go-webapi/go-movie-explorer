@@ -8,10 +8,8 @@ import (
 
 	"go-movie-explorer/handlers"   // ハンドラー
 	"go-movie-explorer/middleware" // ミドルウェア
-	"go-movie-explorer/services"   // サービス層
 
 	"github.com/joho/godotenv" // .envファイルの読み込み
-	"goa.design/clue/health"   // clue/healthによるhealthチェックエンドポイント
 )
 
 func main() {
@@ -58,12 +56,18 @@ func main() {
 	// ルートマルチプレクサーを作成
 	mux := http.NewServeMux()
 
-	// clue/healthによるhealthチェックエンドポイント
-	checker := health.NewChecker(&services.TmdbPinger{})
-	mux.Handle("/healthz", health.Handler(checker))
+	// セキュリティミドルウェアを全体に適用
+	securedHandler := middleware.SecurityMiddleware(securityConfig)(mux)
+
+	// ヘルスチェックエンドポイント
+	mux.HandleFunc("/healthz", handlers.HealthHandler)
 
 	// 映画一覧取得
 	mux.HandleFunc("/api/movies", middleware.LoggingHandler(handlers.MoviesHandler))
+
+	// - /api/genres : ジャンル一覧取得
+	mux.HandleFunc("/api/genres", middleware.LoggingHandler(handlers.GenresHandler))
+
 	// 映画ジャンル別取得
 	mux.HandleFunc("/api/movies/genre", middleware.LoggingHandler(handlers.ListMoviesByGenreHandler))
 
@@ -73,16 +77,8 @@ func main() {
 	// - /api/movies/search：映画検索APIエンドポイント
 	mux.HandleFunc("/api/movies/search", middleware.LoggingHandler(handlers.SearchMoviesHandler))
 
-	// - /api/genres : ジャンル一覧取得
-	mux.HandleFunc("/api/genres", middleware.LoggingHandler(handlers.GenresHandler))
-	// mux.HandleFunc("/api/genres/", middleware.LoggingHandler(handlers.GenresHandler))
-
-	// セキュリティミドルウェアを全体に適用
-	securedHandler := middleware.SecurityMiddleware(securityConfig)(mux)
-
 	// - /api/movies/popular : 人気映画ランキング（今後追加予定）
-	//
-	// 新しいエンドポイントを追加する場合は、ここにルーティングを追記してください。
+	mux.HandleFunc("/api/movies/popular", middleware.LoggingHandler(handlers.PopularMoviesHandler))
 
 	log.Printf("Server starting on http://localhost%s\n", port)
 	log.Printf("Server listening on port %s", port)
