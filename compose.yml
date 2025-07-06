@@ -36,6 +36,20 @@ services:
       - VITE_DEBUG=${VITE_DEBUG:-true}
       - VITE_APP_ENV=${VITE_APP_ENV:-development}
 
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./docs:/usr/share/nginx/html/docs
+    environment:
+      - SWAGGER_JSON=/usr/share/nginx/html/docs/openapi.yaml
+    networks:
+      - app-network
+    restart: unless-stopped
+    depends_on:
+      - backend
+
 volumes:
   backend_logs:
     driver: local
